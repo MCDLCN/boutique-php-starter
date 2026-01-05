@@ -8,10 +8,7 @@ Starter HTML/CSS pour la formation PHP 14 jours. Template statique à "PHPiser" 
 2. Cloner votre fork :
 ```bash
 git clone https://github.com/VOTRE-USERNAME/boutique-php-starter.git
-cd boutique-php-starter
-php -S localhost:8000 -t public
 ```
-3. Ouvrir http://localhost:8000
 
 ## Structure
 
