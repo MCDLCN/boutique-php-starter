@@ -1,41 +1,5 @@
 <?php
-$products=[
-	[
-        "name" => "Leather",
-        "price" => 29.99,
-        "stock" => 50,
-        "image" => "https://via.placeholder.com/300x300?text=Leather"
-    ],
-	[
-        "name" => "Glasses",
-        "price" => 9.99,
-        "stock" => 15,
-        "image" => "https://via.placeholder.com/300x300?text=Glasses"
-    ],
-	[
-        "name" => "Will to live",
-        "price" => 9999999,
-        "stock" => 0,
-        "image" => "https://via.placeholder.com/300x300?text=Will to live"
-    ],
-	[
-        "name" => "AAAA",
-        "price" => 2.99,
-        "stock" => 5,
-        "image" => "https://via.placeholder.com/300x300?text=AAAA"
-    ],
-	[
-        "name" => "Amogus",
-        "price" => 299,
-        "stock" => 500,
-        "image" => "https://via.placeholder.com/300x300?text=Amogus"
-    ],
-    [
-        "name" => "BBBB",
-        "price" => 1,
-        "stock" => 2,
-        "image" => "https://via.placeholder.com/300x300?text=BBBB"
-    ],
+$products = [
     [
         "name"  => "T-shirt",
         "price" => 19.99,
@@ -83,6 +47,31 @@ $products=[
         "price" => 5.99,
         "stock" => 40,
         "image" => "https://via.placeholder.com/300x300?text=Socks"
-    ]
+    ],
 ];
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .product { border: 1px solid #ddd; padding: 15px; }
+        .outOfStock { color: red; }
+        .stocked { color: green; }
+    </style>
+</head>
+<body>
+    <div class="grid">
+        <?php foreach ($products as $product): ?>
+            <div class="product">
+                <p>Image: <img src="<?= $product["image"] ?>" alt="<?= htmlspecialchars($product["name"]) ?>"></p>
+                <p><?= $product["name"];?></p>
+                <p><?php echo round($product["price"], 2); ?>$</p>
+                <?php if ($product["stock"]>0){echo '<p class="stocked"> available </p>';}
+                else {echo '<p class="outOfStock"> unavailable </p>';} ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<p><?php echo count($products); ?> produits affichés</p>
+</body>
+</html>
