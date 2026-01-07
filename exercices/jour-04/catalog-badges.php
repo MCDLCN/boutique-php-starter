@@ -1,6 +1,70 @@
 <?php
-// starter-project/public/catalogue.php
-require_once __DIR__ . '/../app/data.php';
+$products = [
+    [
+        "name"  => "T-shirt",
+        "price" => 19.99,
+        "stock" => 25,
+        "image" => "https://via.placeholder.com/300x300?text=T-shirt",
+        "new" => false,
+        "discount" => 70
+    ],
+    [
+        "name"  => "Glasses",
+        "price" => 89.99,
+        "stock" => 0,
+        "image" => "https://via.placeholder.com/300x300?text=Glasses",
+        "new" => true,
+        "discount" => 0
+    ],
+    [
+        "name"  => "Sneakers",
+        "price" => 129.99,
+        "stock" => 12,
+        "image" => "https://via.placeholder.com/300x300?text=Sneakers",
+        "new" => false,
+        "discount" => 30
+    ],
+    [
+        "name"  => "Backpack",
+        "price" => 59.99,
+        "stock" => 8,
+        "image" => "https://via.placeholder.com/300x300?text=Backpack",
+        "new" => true,
+        "discount" => 10
+    ],
+    [
+        "name"  => "Watch",
+        "price" => 249.99,
+        "stock" => 3,
+        "image" => "https://via.placeholder.com/300x300?text=Watch",
+        "new" => false,
+        "discount" => 0
+    ],
+    [
+        "name"  => "Cap",
+        "price" => 14.99,
+        "stock" => 0,
+        "image" => "https://via.placeholder.com/300x300?text=Cap",
+        "new" => true,
+        "discount" => 0
+    ],
+    [
+        "name"  => "Jacket",
+        "price" => 179.99,
+        "stock" => 6,
+        "image" => "https://via.placeholder.com/300x300?text=Jacket",
+        "new" => true,
+        "discount" => 20
+    ],
+    [
+        "name"  => "Socks",
+        "price" => 5.99,
+        "stock" => 3,
+        "image" => "https://via.placeholder.com/300x300?text=Socks",
+        "new" => false,
+        "discount" => 50
+    ],
+];
 $inStock = 0;
 $onSale = 0;
 $outOfStock = 0;
@@ -38,8 +102,7 @@ foreach ($products as $product){
                 if ($product["stock"]<5 && $product["stock"]>0){
                 echo '<span class="badge badge-pill bg-primary"> Running out </span>';}
                 if ($product["stock"]===0){
-                echo '<span class="badge badge-pill bg-primary"> Out of stock </span>';}
-                echo '<br>';
+                echo '<span class="badge badge-pill bg-primary"> Out of stock </span>';} 
                 $canBuy= $product["stock"]>0 ? ' <button type="button">Buy!</button> ' : ' <button type="button" disabled>Buy!</button> ';
                 echo $canBuy;
                 ?>
