@@ -1,6 +1,7 @@
 <?php
 $products=[
 	[
+        "id" => 1,
         "name" => "Leather",
         "price" => 29.99,
         "stock" => 150,
@@ -11,6 +12,7 @@ $products=[
         "dateAdded" => "2025-12-31"
     ],
     [
+        "id" => 2,
         "name" => "Glasses",
         "price" => 9.99,
         "stock" => 15,
@@ -21,6 +23,7 @@ $products=[
         "dateAdded" => "2024-10-01"
     ],
     [
+        "id" => 3,
         "name" => "Will to live",
         "price" => 9999999,
         "stock" => 0,
@@ -31,6 +34,7 @@ $products=[
         "dateAdded" => "2026-01-06"
     ],
     [
+        "id" => 4,
         "name" => "AAAA",
         "price" => 2.99,
         "stock" => 5,
@@ -41,6 +45,7 @@ $products=[
         "dateAdded" => "2023-02-15"
     ],
 	[
+        "id" => 5,
         "name" => "Amogus",
         "price" => 299,
         "stock" => 500,
@@ -51,6 +56,7 @@ $products=[
         "dateAdded" => "2025-12-29"
     ],
     [
+        "id" => 6,
         "name" => "BBBB",
         "price" => 1,
         "stock" => 2,
@@ -61,6 +67,7 @@ $products=[
         "dateAdded" => "2025-11-14"
     ],
     [
+        "id" => 7,
         "name"  => "T-shirt",
         "price" => 19.99,
         "stock" => 25,
@@ -71,6 +78,7 @@ $products=[
         "dateAdded" => "2025-10-06"
     ],
     [
+        "id" => 8,
         "name"  => "Necklace",
         "price" => 89.99,
         "stock" => 0,
@@ -81,6 +89,7 @@ $products=[
         "dateAdded" => "2025-09-22"
     ],
     [
+        "id" => 9,
         "name"  => "Sneakers",
         "price" => 129.99,
         "stock" => 12,
@@ -91,6 +100,7 @@ $products=[
         "dateAdded" => "2025-08-03"
     ],
     [
+        "id" => 10,
         "name"  => "Backpack",
         "price" => 59.99,
         "stock" => 8,
@@ -101,6 +111,7 @@ $products=[
         "dateAdded" => "2025-07-17"
     ],
     [
+        "id" => 11,
         "name"  => "Watch",
         "price" => 249.99,
         "stock" => 3,
@@ -111,6 +122,7 @@ $products=[
         "dateAdded" => "2025-07-17"
     ],
     [
+        "id" => 12,
         "name"  => "Cap",
         "price" => 14.99,
         "stock" => 0,
@@ -121,6 +133,7 @@ $products=[
         "dateAdded" => "2025-05-28"
     ],
     [
+        "id" => 13,
         "name"  => "Jacket",
         "price" => 179.99,
         "stock" => 6,
@@ -131,6 +144,7 @@ $products=[
         "dateAdded" => "2025-04-11"
     ],
     [
+        "id" => 14,
         "name"  => "Socks",
         "price" => 5.99,
         "stock" => 3,
@@ -139,6 +153,17 @@ $products=[
         "discount" => 50,
         "category" => "clothes",
         "dateAdded" => "2025-03-02"
+    ],
+    [
+        "id" => 15,
+        "name"  => "BLEEEEEEEEEH",
+        "price" => 69.13,
+        "stock" => 37,
+        "image" => "https://via.placeholder.com/300x300?text=BLEEEEEEEEEH",
+        "new" => false,
+        "discount" => 0,
+        "category" => "TongueOut",
+        "dateAdded" => "2020-03-02"
     ]
 ];
 ?>

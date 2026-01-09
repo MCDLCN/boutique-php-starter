@@ -79,3 +79,7 @@ function dump_and_die(mixed ...$vars): void {
     }
     die();
 }
+
+function e($string) {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}

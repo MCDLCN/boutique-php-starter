@@ -1,17 +1,10 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/../config/constants.php';
+require_once __DIR__ . '/../../app/data.php';
+require_once __DIR__ . '/../../app/helpers.php';
+
 $page = $_GET['page'] ?? 1;
-
-$name = "Amogus";
-$desc = "Dis amazing plushie";
-$price = 2057.6;
-$quantity = 8;
-$priceTaxed = $price + taxOnPrice($price, TAX);
-$discount = 50;
-
-function priceTaxedDiscounted(float $priceTaxed, float $discount){return $priceTaxed - ($priceTaxed*($discount/100));};
-function taxOnPrice(float $price, float $tax): float{return $price * ($tax/100);};
 ?>
 <!DOCTYPE html>
 <html lang="en">

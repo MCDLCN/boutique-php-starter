@@ -2,50 +2,248 @@
 // starter-project/public/catalogue.php
 require_once __DIR__ . '/../app/data.php';
 require_once __DIR__ . '/../app/helpers.php';
+
 $inStock = 0;
 $onSale = 0;
 $outOfStock = 0;
 
-foreach ($products as $product){
-    $product["stock"]>0 ? $inStock++ : $outOfStock++;
-    if ($product["discount"]>0)  $onSale++;
+foreach ($products as $product) {
+    $product['stock'] > 0 ? $inStock++ : $outOfStock++;
+    if ($product['discount'] > 0) $onSale++;
 }
+
+$categoryCounts = [];
+
+foreach ($products as $product) {
+    $category = $product['category'];
+    $categoryCounts[$category] = ($categoryCounts[$category] ?? 0) + 1;
+}
+
+$categoriesSide = array_values(array_unique(array_map(fn($p) => $p['category'], $products)));
+$selectedCategories = $_GET['categories'] ?? [];
+$nameSearch = $_GET['nameSearch'] ?? '';
+$maxPrice = $_GET['price_max'] ?? '';
+$minPrice = $_GET['price_min'] ?? '';
+$inStockOnly = isset($_GET['in_stock']);
+$categoriesSelected = $_GET['categories'] ?? [];
+$countTotal=0;
+
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .product { border: 1px solid #ddd; padding: 15px; }
-        .outOfStock { color: red; }
-        .stocked { color: green; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog - MyShop</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <?= $inStock.' products in Stock. '.$onSale.' products on sale. '.$outOfStock.' products out of stock<br>';?>
-    <div class="grid">
-        <?php foreach ($products as $product): ?>
-            <div class="product">
-                <p>Image: <img src="<?= $product["image"] ?>" alt="<?= htmlspecialchars($product["name"]) ?>"></p>
-                <p><?= $product["name"];?></p>
-                <p><?= isOnSale($product["discount"]) ? formatPrice(calculateDiscounted($product["price"],$product["discount"])) : formatPrice($product["price"]); ?></p>
-                <?php if (isNew($product['dateAdded'])){
-                echo '<span class="badge badge-pill bg-primary"> New </span>';}
 
-                if (isOnSale($product["discount"])){
-                echo displayBadge("on sale!", "pink");}
-
-                [$text, $colour] = displayStock($product["stock"]);
-                echo displayBadge($text, $colour);
-
-                echo '<br>';
-
-                echo $product["stock"]>0 ? ' <button type="button">Buy!</button> ' : ' <button type="button" disabled>Buy!</button> ';
-                ?>
-            </div>
-        <?php endforeach; ?>
+<header class="header">
+    <div class="container header__container">
+        <a href="index.html" class="header__logo">🛍️ MyShop</a>
+        <nav class="header__nav">
+            <a href="index.html" class="header__nav-link">Home</a>
+            <a href="catalogue.html" class="header__nav-link header__nav-link--active">Catalog</a>
+            <a href="contact.html" class="header__nav-link">Contact</a>
+        </nav>
+        <div class="header__actions">
+            <a href="panier.html" class="header__cart">🛒<span class="header__cart-badge">3</span></a>
+            <a href="connexion.html" class="btn btn--primary btn--sm">Log in</a>
+        </div>
+        <button class="header__menu-toggle">☰</button>
     </div>
+</header>
+
+<main class="main-content">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Our Catalog</h1>
+            <p class="page-subtitle">Discover all out products</p>
+            <p><strong><?= $inStock ?></strong> in stock · <strong><?= $outOfStock ?></strong> out of stock · <strong><?= $onSale ?></strong> on sale</p>
+        </div>
+
+        <div class="catalog-layout">
+
+            <!-- ============================================
+                 SIDEBAR FILTRES
+                 JOUR 6 : Formulaire GET + conservation valeurs
+                 ============================================ -->
+            <aside class="catalog-sidebar">
+                <form method="GET" action="catalogue.php">
+                    <div class="catalog-sidebar__section">
+                        <h3 class="catalog-sidebar__title">Search</h3>
+                        <!-- JOUR 6 : value="<?= e($_GET['nameSearch'] ?? '') ?>" -->
+                        <input type="text" name="nameSearch" class="form-input" placeholder="Search..." value="<?= e($nameSearch) ?>">
+                    </div>
+
+                    <div class="catalog-sidebar__section">
+                        <h3 class="catalog-sidebar__title">Categories</h3>
+                        <div class="catalog-sidebar__categories">
+                            <!-- JOUR 6 : checked si in_array(...) -->
+                            <?php foreach ($categoriesSide as $product): ?>
+                            <label class="form-checkbox">
+                                <input type="checkbox" name="categories[]" value="<?= e($product) ?>" <?= in_array($product, $selectedCategories, true) ? 'checked' : '' ?>>
+                                <span><?= e($product). " (".$categoryCounts[$product].")"?></span>
+                            </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <div class="catalog-sidebar__section">
+                        <h3 class="catalog-sidebar__title">Price</h3>
+                        <div class="catalog-sidebar__price-inputs">
+                            <div class="form-group">
+                                <label class="form-label">Min</label>
+                                <input type="number" name="price_min" class="form-input" placeholder="0$" min="0" value="<?= e($minPrice) ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Max</label>
+                                <input type="number" name="price_max" class="form-input" placeholder="100$" min="0" value="<?= e($maxPrice) ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="catalog-sidebar__section">
+                        <h3 class="catalog-sidebar__title">Availability</h3>
+                        <label class="form-checkbox">
+                            <input type="checkbox" name="in_stock" value="1" <?php if(isset($_GET['in_stock'])) echo "checked='checked'"; ?>>
+                            <span>Only in stock</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn--primary btn--block">Apply</button>
+                    <a href="catalogue.php" class="btn btn--secondary btn--block mt-sm">Reset</a>
+                </form>
+            </aside>
+
+            <div class="catalog-main">
+                <div class="catalog-header">
+                    <p><strong><?= $countTotal ?></strong> products found</p>
+                    <div class="catalog-header__sort">
+                        <label>Sort:</label>
+                        <select class="form-select" style="width:auto">
+                            <option>Name A-Z</option>
+                            <option>Name Z-A</option>
+                            <option>Price ↑</option>
+                            <option>Price ↓</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ============================================
+                     8 PRODUITS
+                     JOUR 3 : foreach
+                     JOUR 4 : Badges conditionnels
+                     ============================================ -->
+                <div class="products-grid">
+<?php foreach ($products as $product): ?>
+    <?php
+        if ($nameSearch !== '' && stripos($product['name'], $nameSearch) === false) continue;
+        if ($maxPrice !== '' && $product['price'] > (float)$maxPrice) continue;
+        if ($minPrice !== '' && $product['price'] < (float)$minPrice) continue;
+        if ($inStockOnly && $product['stock'] > 0) continue;
+        if (!empty($categoriesSelected) && !in_array($product['category'], $categoriesSelected)) continue;
+
+        $id = $product['id'] ?? '';
+        $isSale = isOnSale($product['discount']);
+        $isNewProduct = isNew($product['dateAdded']);
+        $stock = (int)($product['stock'] ?? 0);
+        $name = $product['name'] ?? '';
+        $image = $product['image'] ?? '';
+        $price = $product['price'] ?? '';
+        $discount = $product['discount'] ?? '';
+        $description = $product['description'] ?? '';
+        $category = $product['category'] ?? '';
+        $countTotal++;
+    ?>
+    <article class="product-card">
+        <div class="product-card__image-wrapper">
+            <img src="<?= e($image) ?>" alt="<?= e($name) ?>" class="product-card__image">
+            <div class="product-card__badges">
+                <?php if ($isNewProduct): ?>
+                    <span class="badge badge--new">New</span>
+                <?php endif; ?>
+
+                <?php if ($isSale): ?>
+                    <span class="badge badge--promo">-<?= (int)$isSale ?>%</span>
+                <?php endif; ?>
+
+                <?php if ($stock > 0 && $stock <= 3): ?>
+                    <span class="badge badge--low-stock">lasts</span>
+                <?php endif; ?>
+
+                <?php if ($stock <= 0): ?>
+                    <span class="badge badge--out-of-stock">Out of stock</span>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="product-card__content">
+            <span class="product-card__category"><?= e($category) ?></span>
+            <a href="product.php<?= $id !== '' ? ('?id=' . urlencode((string)$id)) : '' ?>" class="product-card__title">
+                <?= e($name) ?>
+            </a>
+
+            <div class="product-card__price">
+                <?php if ($isSale): ?>
+                    <span class="product-card__price-current"><?= formatPrice(calculateDiscounted($price, $isSale)) ?></span>
+                    <span class="product-card__price-old"><?= formatPrice($price) ?></span>
+                <?php else: ?>
+                    <span class="product-card__price-current"><?= formatPrice($price) ?></span>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($stock <= 0): ?>
+                <p class="product-card__stock product-card__stock--out">✗ Out of stock</p>
+            <?php elseif ($stock <= 3): ?>
+                <p class="product-card__stock product-card__stock--low">⚠ Only <?= $stock ?> left</p>
+            <?php else: ?>
+                <p class="product-card__stock product-card__stock--available">✓ In stock (<?= $stock ?>)</p>
+            <?php endif; ?>
+
+            <div class="product-card__actions">
+                <?php if ($stock > 0): ?>
+                    <form action="panier.html" method="POST">
+                        <input type="hidden" name="product_id" value="<?= e((string)$id) ?>">
+                        <button type="submit" class="btn btn--primary btn--block">Add</button>
+                    </form>
+                <?php else: ?>
+                    <button class="btn btn--secondary btn--block" disabled>Unavailable</button>
+                <?php endif; ?>
+            </div>
+        </div>
+    </article>
+<?php endforeach; ?>
+</div>
+
+                <!-- ============================================
+                     PAGINATION
+                     JOUR 6 : Générer dynamiquement
+                     ============================================ -->
+                <nav class="pagination">
+                    <a class="pagination__item pagination__item--disabled">←</a>
+                    <a class="pagination__item pagination__item--active">1</a>
+                    <a class="pagination__item">2</a>
+                    <a class="pagination__item">3</a>
+                    <a class="pagination__item">→</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer__grid">
+            <div class="footer__section"><h4>À propos</h4><p>MyShop - Shopping en ligne.</p></div>
+            <div class="footer__section"><h4>Navigation</h4><ul><li><a href="index.html">Accueil</a></li><li><a href="catalogue.html">Catalogue</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+            <div class="footer__section"><h4>Compte</h4><ul><li><a href="connexion.html">Connexion</a></li><li><a href="inscription.html">Inscription</a></li><li><a href="panier.html">Panier</a></li></ul></div>
+            <div class="footer__section"><h4>Formation</h4><ul><li><a href="#">Jour 1-5</a></li><li><a href="#">Jour 6-10</a></li><li><a href="#">Jour 11-14</a></li></ul></div>
+        </div>
+        <div class="footer__bottom"><p>&copy; 2024 MyShop</p></div>
+    </div>
+</footer>
+
 </body>
 </html>
