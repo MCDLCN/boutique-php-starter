@@ -9,6 +9,7 @@ $products=[
         "discount" => 0,
         "new" => true,
         "category" => "material",
+        "description" => "Leather",
         "dateAdded" => "2025-12-31"
     ],
     [
@@ -20,6 +21,7 @@ $products=[
         "discount" => 80,
         "new" => false,
         "category" => "accessories",
+        "description" => "To see better",
         "dateAdded" => "2024-10-01"
     ],
     [
@@ -31,6 +33,7 @@ $products=[
         "discount" => 0,
         "new" => false,
         "category" => "idk",
+        "description" => "Unobtainable",
         "dateAdded" => "2026-01-06"
     ],
     [
@@ -42,6 +45,7 @@ $products=[
         "discount" => 15,
         "new" => true,
         "category" => "AAAA",
+        "description" => "AAAA",
         "dateAdded" => "2023-02-15"
     ],
 	[
@@ -53,6 +57,7 @@ $products=[
         "discount" => 5,
         "new" => false,
         "category" => "plushie",
+        "description" => "Not a dead meme btw",
         "dateAdded" => "2025-12-29"
     ],
     [
@@ -64,6 +69,7 @@ $products=[
         "discount" => 0,
         "new" => true,
         "category" => "AAAA",
+        "description" => "Very similar to AAAA",
         "dateAdded" => "2025-11-14"
     ],
     [
@@ -75,6 +81,7 @@ $products=[
         "new" => false,
         "discount" => 70,
         "category" => "clothes",
+        "description" => "Just a shirt",
         "dateAdded" => "2025-10-06"
     ],
     [
@@ -86,6 +93,7 @@ $products=[
         "new" => true,
         "discount" => 0,
         "category" => "accessories",
+        "description" => "To put around your neck",
         "dateAdded" => "2025-09-22"
     ],
     [
@@ -97,6 +105,7 @@ $products=[
         "new" => false,
         "discount" => 30,
         "category" => "clothes",
+        "description" => "To put around your feet",
         "dateAdded" => "2025-08-03"
     ],
     [
@@ -108,6 +117,7 @@ $products=[
         "new" => true,
         "discount" => 10,
         "category" => "accessories",
+        "description" => "This bad boy can fit so many things in it",
         "dateAdded" => "2025-07-17"
     ],
     [
@@ -119,6 +129,7 @@ $products=[
         "new" => false,
         "discount" => 0,
         "category" => "accessories",
+        "description" => "Not gucci",
         "dateAdded" => "2025-07-17"
     ],
     [
@@ -130,6 +141,7 @@ $products=[
         "new" => true,
         "discount" => 0,
         "category" => "accessories",
+        "description" => "On your head",
         "dateAdded" => "2025-05-28"
     ],
     [
@@ -141,6 +153,7 @@ $products=[
         "new" => true,
         "discount" => 20,
         "category" => "clothes",
+        "description" => "To put around your shoulder",
         "dateAdded" => "2025-04-11"
     ],
     [
@@ -152,6 +165,7 @@ $products=[
         "new" => false,
         "discount" => 50,
         "category" => "clothes",
+        "description" => "Around your grippers",
         "dateAdded" => "2025-03-02"
     ],
     [
@@ -163,6 +177,7 @@ $products=[
         "new" => false,
         "discount" => 0,
         "category" => "TongueOut",
+        "description" => "BLEEEEEEEEEH",
         "dateAdded" => "2020-03-02"
     ]
 ];
