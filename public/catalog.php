@@ -1,7 +1,11 @@
 <?php
-// starter-project/public/catalog.php
-//require_once __DIR__ . '/../app/data.php';
+// public/catalog.php
+declare(strict_types=1);
+
 require_once __DIR__ . '/../app/helpers.php';
+require_once __DIR__ . '/../app/Entity/Product.php';
+
+session_start();
 
 try {
     $pdo = new PDO(
@@ -11,77 +15,87 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
-        $e->getMessage();
+    die("DB error");
 }
 
-session_start();
-$stmt = $pdo->prepare("SELECT * FROM products");
-$stmt->execute();
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$inStock = 0;
-$onSale = 0;
-$outOfStock = 0;
-
-foreach ($products as $product) {
-    $product['stock'] > 0 ? $inStock++ : $outOfStock++;
-    if ($product['discount'] > 0) $onSale++;
-}
-
-$categoryCounts = [];
-
-foreach ($products as $product) {
-    $category = $product['category'];
-    $categoryCounts[$category] = ($categoryCounts[$category] ?? 0) + 1;
-}
-
-$categoriesSide = array_values(array_unique(array_map(fn($p) => $p['category'], $products)));
-$selectedCategories = $_GET['categories'] ?? [];
-$nameSearch = $_GET['nameSearch'] ?? '';
-$maxPrice = $_GET['price_max'] ?? '';
-$minPrice = $_GET['price_min'] ?? '';
-$inStockOnly = isset($_GET['in_stock']);
-$categoriesSelected = $_GET['categories'] ?? [];
-$countTotal=0;
-
-if (!isset($_SESSION["totalCart"])) {
-    $_SESSION["totalCart"] = 0;
-}
-
-if (isset($_SESSION['flash'])){
-    echo '<script>alert ("'.$_SESSION['flash'].'")</script>';
+// Flash message (from cart actions)
+if (isset($_SESSION['flash'])) {
+    echo '<script>alert("' . e((string)$_SESSION['flash']) . '")</script>';
     unset($_SESSION['flash']);
 }
 
-if (isset($_POST["idCart"])) {
-    $id = $_POST["idCart"];
-    $quantity = ($_POST["quantityAdd"] ?? 0);
-    $currentQuantity = $_SESSION["cart"][$id] ?? 0;
-    if ($quantity + $currentQuantity <= $products[$_POST["idCart"]]["stock"]){   
-        if (!isset($_SESSION["cart"][$id])) {
-            $_SESSION["cart"][$id] = intval($quantity);
-            echo "<script>alert ('Added to cart')</script>";
-        } else {
-            $_SESSION["cart"][$id] = $_SESSION["cart"][$id] + $quantity;
-            echo "<script>alert ('Added to cart')</script>";
-        }
-    }else {
-    echo "<script>alert ('Not enough stock')</script>";
+// Fetch products and hydrate objects
+$stmt = $pdo->prepare("SELECT id, name, description, price, stock, category, discount, image, dateAdded FROM products");
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+/** @var Product[] $products */
+$products = [];
+foreach ($rows as $r) {
+    $products[] = new Product(
+        (int)$r['id'],
+        (string)$r['name'],
+        (string)($r['description'] ?? ''),
+        (float)$r['price'],
+        (int)$r['stock'],
+        (string)($r['category'] ?? ''),
+        (int)($r['discount'] ?? 0),
+        (string)($r['image'] ?? ''),
+        (string)($r['dateAdded'] ?? '')
+    );
+}
+
+// Counters + category counts
+$inStock = 0;
+$onSale = 0;
+$outOfStock = 0;
+$categoryCounts = [];
+
+foreach ($products as $p) {
+    $p->isInStock() ? $inStock++ : $outOfStock++;
+    if ($p->isOnSale()) $onSale++;
+
+    $cat = $p->category;
+    if ($cat !== '') {
+        $categoryCounts[$cat] = ($categoryCounts[$cat] ?? 0) + 1;
     }
 }
 
-if (!isset($_SESSION["totalItemsCart"])) {
-    $_SESSION["totalItemsCart"] = 0;
+$categoriesSide = array_values(array_unique(array_map(fn(Product $p) => $p->category, $products)));
+
+// Filters (GET)
+$selectedCategories = $_GET['categories'] ?? [];
+$nameSearch = (string)($_GET['nameSearch'] ?? '');
+$maxPrice = (string)($_GET['price_max'] ?? '');
+$minPrice = (string)($_GET['price_min'] ?? '');
+$inStockOnly = isset($_GET['in_stock']);
+
+
+
+$filtered = [];
+
+foreach ($products as $p) {
+    if ($nameSearch !== '' && stripos($p->name, $nameSearch) === false) continue;
+    if ($inStockOnly && !$p->isInStock()) continue;
+    if (!empty($selectedCategories) && !in_array($p->category, $selectedCategories, true)) continue;
+    if ($maxPrice !== '' && $p->getFinalPrice() > (float)$maxPrice) continue;
+    if ($minPrice !== '' && $p->getFinalPrice() < (float)$minPrice) continue;
+
+    $filtered[] = $p;
 }
-if (isset($_SESSION["cart"])) {
-    $_SESSION["totalItemsCart"] = 0;
-    foreach ($_SESSION["cart"] as $key => $value) {
-            $_SESSION["totalItemsCart"] += $value ;}
-} else {
-    $_SESSION["totalItemsCart"] = 0;}
 
+$sort = $_GET['sort'] ?? '';
 
-
+usort($filtered, function (Product $a, Product $b) use ($sort) {
+    return match ($sort) {
+        'az'         => strcasecmp($a->name, $b->name),
+        'za'         => strcasecmp($b->name, $a->name),
+        'price_asc'  => $a->getFinalPrice() <=> $b->getFinalPrice(),
+        'price_desc' => $b->getFinalPrice() <=> $a->getFinalPrice(),
+        default      => 0,
+    };
+});
+                        
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -98,11 +112,11 @@ if (isset($_SESSION["cart"])) {
         <a href="index.html" class="header__logo">🛍️ MyShop</a>
         <nav class="header__nav">
             <a href="index.html" class="header__nav-link">Home</a>
-            <a href="catalog.html" class="header__nav-link header__nav-link--active">Catalog</a>
+            <a href="catalog.php" class="header__nav-link header__nav-link--active">Catalog</a>
             <a href="contact.html" class="header__nav-link">Contact</a>
         </nav>
         <div class="header__actions">
-            <a href="cart.php" class="header__cart">🛒<span class="header__cart-badge">3</span></a>
+            <a href="cart.php" class="header__cart">🛒<span class="header__cart-badge"><?= (int)($_SESSION['totalItemsCart'] ?? 0) ?></span></a>
             <a href="connexion.html" class="btn btn--primary btn--sm">Log in</a>
         </div>
         <button class="header__menu-toggle">☰</button>
@@ -118,41 +132,35 @@ if (isset($_SESSION["cart"])) {
         </div>
 
         <div class="catalog-layout">
-
-            <!-- ============================================
-                 SIDEBAR FILTRES
-                 JOUR 6 : Formulaire GET + conservation valeurs
-                 ============================================ -->
             <aside class="catalog-sidebar">
                 <form method="GET" action="catalog.php">
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Search</h3>
-                        <!-- JOUR 6 : value="<?= e($_GET['nameSearch'] ?? '') ?>" -->
                         <input type="text" name="nameSearch" class="form-input" placeholder="Search..." value="<?= e($nameSearch) ?>">
                     </div>
 
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Categories</h3>
                         <div class="catalog-sidebar__categories">
-                            <!-- JOUR 6 : checked si in_array(...) -->
-                            <?php foreach ($categoriesSide as $product): ?>
-                            <label class="form-checkbox">
-                                <input type="checkbox" name="categories[]" value="<?= e($product) ?>" <?= in_array($product, $selectedCategories, true) ? 'checked' : '' ?>>
-                                <span><?= e($product). " (".$categoryCounts[$product].")"?></span>
-                            </label>
+                            <?php foreach ($categoriesSide as $cat): ?>
+                                <label class="form-checkbox">
+                                    <input type="checkbox" name="categories[]" value="<?= e($cat) ?>" <?= in_array($cat, $selectedCategories, true) ? 'checked' : '' ?>>
+                                    <span><?= e($cat) ?> (<?= (int)($categoryCounts[$cat] ?? 0) ?>)</span>
+                                </label>
                             <?php endforeach; ?>
                         </div>
                     </div>
+
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Price</h3>
                         <div class="catalog-sidebar__price-inputs">
                             <div class="form-group">
                                 <label class="form-label">Min</label>
-                                <input type="number" name="price_min" class="form-input" placeholder="0$" min="0" value="<?= e($minPrice) ?>">
+                                <input type="number" name="price_min" class="form-input" placeholder="0$" min="0" step="0.01" value="<?= e($minPrice) ?>">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Max</label>
-                                <input type="number" name="price_max" class="form-input" placeholder="100$" min="0" value="<?= e($maxPrice) ?>">
+                                <input type="number" name="price_max" class="form-input" placeholder="100$" min="0" step="0.01" value="<?= e($maxPrice) ?>">
                             </div>
                         </div>
                     </div>
@@ -160,134 +168,107 @@ if (isset($_SESSION["cart"])) {
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Availability</h3>
                         <label class="form-checkbox">
-                            <input type="checkbox" name="in_stock" value="1" <?php if(isset($_GET['in_stock'])) echo "checked='checked'"; ?>>
+                            <input type="checkbox" name="in_stock" value="1" <?= $inStockOnly ? 'checked' : '' ?>>
                             <span>Only in stock</span>
                         </label>
                     </div>
 
                     <button type="submit" class="btn btn--primary btn--block">Apply</button>
                     <a href="catalog.php" class="btn btn--secondary btn--block mt-sm">Reset</a>
-                </form>
+                
             </aside>
 
             <div class="catalog-main">
                 <div class="catalog-header">
-                    <p><strong><?= $countTotal ?></strong> products found</p>
+                    <p><strong><?= (int)count($filtered) ?></strong> products found</p>
                     <div class="catalog-header__sort">
                         <label>Sort:</label>
-                        <select class="form-select" style="width:auto">
-                            <option>Name A-Z</option>
-                            <option>Name Z-A</option>
-                            <option>Price ↑</option>
-                            <option>Price ↓</option>
+                        <select name="sort" onchange="this.form.submit()">
+                            <option value="az" <?= ($_GET['sort'] ?? '') === 'az' ? 'selected' : '' ?>>A → Z</option>
+                            <option value="za" <?= ($_GET['sort'] ?? '') === 'za' ? 'selected' : '' ?>>Z → A</option>
+                            <option value="price_asc" <?= ($_GET['sort'] ?? '') === 'price_asc' ? 'selected' : '' ?>>Price ↑</option>
+                            <option value="price_desc" <?= ($_GET['sort'] ?? '') === 'price_desc' ? 'selected' : '' ?>>Price ↓</option>
                         </select>
+                        </form>
                     </div>
                 </div>
 
-                <!-- ============================================
-                     8 PRODUITS
-                     JOUR 3 : foreach
-                     JOUR 4 : Badges conditionnels
-                     ============================================ -->
                 <div class="products-grid">
-<?php foreach ($products as $product): ?>
-    <?php
-        if ($nameSearch !== '' && stripos($product['name'], $nameSearch) === false) continue;
-        if ($maxPrice !== '' && $product['price'] > (float)$maxPrice) continue;
-        if ($minPrice !== '' && $product['price'] < (float)$minPrice) continue;
-        if ($inStockOnly && $product['stock'] <= 0) continue;
-        if (!empty($categoriesSelected) && !in_array($product['category'], $categoriesSelected)) continue;
+                    <?php foreach ($filtered as $p): ?>
+                        <?php $stock = $p->stock; ?>
+                        <article class="product-card">
+                            <div class="product-card__image-wrapper">
+                                <img src="<?= e($p->getImage()) ?>" alt="<?= e($p->name) ?>" class="product-card__image">
+                                <div class="product-card__badges">
+                                    <?php if ($p->isNew()): ?>
+                                        <span class="badge badge--new">New</span>
+                                    <?php endif; ?>
 
-        $id = $product['id'] ?? '';
-        $isSale = isOnSale($product['discount']);
-        $isNewProduct = isNew($product['dateAdded']);
-        $stock = (int)($product['stock'] ?? 0);
-        $name = $product['name'] ?? '';
-        $image = $product['image'] ?? '';
-        $price = $product['price'] ?? '';
-        $discount = $product['discount'] ?? '';
-        $description = $product['description'] ?? '';
-        $category = $product['category'] ?? '';
-        $countTotal++;
-    ?>
-    <article class="product-card">
-        <div class="product-card__image-wrapper">
-            <img src="<?= e($image) ?>" alt="<?= e($name) ?>" class="product-card__image">
-            <div class="product-card__badges">
-                <?php if ($isNewProduct): ?>
-                    <span class="badge badge--new">New</span>
-                <?php endif; ?>
+                                    <?php if ($p->isOnSale()): ?>
+                                        <span class="badge badge--promo">-<?= (int)$p->getDiscount() ?>%</span>
+                                    <?php endif; ?>
 
-                <?php if ($isSale): ?>
-                    <span class="badge badge--promo">-<?= (int)$isSale ?>%</span>
-                <?php endif; ?>
+                                    <?php if ($stock > 0 && $stock <= 3): ?>
+                                        <span class="badge badge--low-stock">lasts</span>
+                                    <?php endif; ?>
 
-                <?php if ($stock > 0 && $stock <= 3): ?>
-                    <span class="badge badge--low-stock">lasts</span>
-                <?php endif; ?>
+                                    <?php if ($stock <= 0): ?>
+                                        <span class="badge badge--out-of-stock">Out of stock</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
-                <?php if ($stock <= 0): ?>
-                    <span class="badge badge--out-of-stock">Out of stock</span>
-                <?php endif; ?>
-            </div>
-        </div>
+                            <div class="product-card__content">
+                                <span class="product-card__category"><?= e($p->category) ?></span>
+                                <a href="product.php?id=<?= urlencode((string)$p->getId()) ?>" class="product-card__title">
+                                    <?= e($p->name) ?>
+                                </a>
 
-        <div class="product-card__content">
-            <span class="product-card__category"><?= e($category) ?></span>
-            <a href="product.php<?= $id !== '' ? ('?id=' . urlencode((string)$id)) : '' ?>" class="product-card__title">
-                <?= e($name) ?>
-            </a>
+                                <div class="product-card__price">
+                                    <?php if ($p->isOnSale()): ?>
+                                        <span class="product-card__price-current"><?= formatPrice($p->getFinalPrice()) ?></span>
+                                        <span class="product-card__price-old"><?= formatPrice($p->getPrice()) ?></span>
+                                    <?php else: ?>
+                                        <span class="product-card__price-current"><?= formatPrice($p->getPrice()) ?></span>
+                                    <?php endif; ?>
+                                </div>
 
-            <div class="product-card__price">
-                <?php if ($isSale): ?>
-                    <span class="product-card__price-current"><?= formatPrice(calculateDiscounted($price, $isSale)) ?></span>
-                    <span class="product-card__price-old"><?= formatPrice($price) ?></span>
-                <?php else: ?>
-                    <span class="product-card__price-current"><?= formatPrice($price) ?></span>
-                <?php endif; ?>
-            </div>
+                                <?php if ($stock <= 0): ?>
+                                    <p class="product-card__stock product-card__stock--out">✗ Out of stock</p>
+                                <?php elseif ($stock <= 3): ?>
+                                    <p class="product-card__stock product-card__stock--low">⚠ Only <?= (int)$stock ?> left</p>
+                                <?php else: ?>
+                                    <p class="product-card__stock product-card__stock--available">✓ In stock (<?= (int)$stock ?>)</p>
+                                <?php endif; ?>
 
-            <?php if ($stock <= 0): ?>
-                <p class="product-card__stock product-card__stock--out">✗ Out of stock</p>
-            <?php elseif ($stock <= 3): ?>
-                <p class="product-card__stock product-card__stock--low">⚠ Only <?= $stock ?> left</p>
-            <?php else: ?>
-                <p class="product-card__stock product-card__stock--available">✓ In stock (<?= $stock ?>)</p>
-            <?php endif; ?>
+                                <div class="product-card__actions">
+                                    <?php if ($stock > 0): ?>
+                                        <form action="cart.php" method="POST">
+                                            <input type="hidden" name="action" value="add">
+                                            <input type="hidden" name="idCart" value="<?= (int)$p->getId() ?>">
 
-            <div class="product-card__actions">
-                <?php if ($stock > 0): ?>
-                    <form action="cart.php" method="POST">
-                        <input type="hidden" name="action" value="add">
-                        <input type="hidden" name="idCart" value="<?= $id ?>">
+                                            <button type="button" onclick="this.nextElementSibling.stepDown()">−</button>
+                                            <input type="number" name="quantityAdd" value="1" min="1" step="1">
+                                            <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
 
-                        <button type="button" onclick="this.nextElementSibling.stepDown()">−</button>
+                                            <button type="submit">Add</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <button class="btn btn--secondary btn--block" disabled>Unavailable</button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
 
-                        <input
-                            type="number"
-                            name="quantityAdd"
-                            value="1"
-                            min="1"
-                            step="1"
-                        >
+                <script>
+                    (function(){
+                        const el = document.querySelector('.catalog-header p strong');
+                        if (el) el.textContent = "<?= (int)$countTotal ?>";
+                    })();
+                </script>
 
-                        <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
-
-                        <button type="submit">Add</button>
-                    </form>
-                <?php else: ?>
-                    <button class="btn btn--secondary btn--block" disabled>Unavailable</button>
-                <?php endif; ?>
-            </div>
-        </div>
-    </article>
-<?php endforeach; ?>
-</div>
-
-                <!-- ============================================
-                     PAGINATION
-                     JOUR 6 : Générer dynamiquement
-                     ============================================ -->
                 <nav class="pagination">
                     <a class="pagination__item pagination__item--disabled">←</a>
                     <a class="pagination__item pagination__item--active">1</a>
