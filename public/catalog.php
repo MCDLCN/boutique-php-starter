@@ -1,5 +1,5 @@
 <?php
-// starter-project/public/catalogue.php
+// starter-project/public/catalog.php
 //require_once __DIR__ . '/../app/data.php';
 require_once __DIR__ . '/../app/helpers.php';
 
@@ -48,9 +48,14 @@ if (!isset($_SESSION["totalCart"])) {
     $_SESSION["totalCart"] = 0;
 }
 
+if (isset($_SESSION['flash'])){
+    echo '<script>alert ("'.$_SESSION['flash'].'")</script>';
+    unset($_SESSION['flash']);
+}
+
 if (isset($_POST["idCart"])) {
     $id = $_POST["idCart"];
-    $quantity = ($_POST["quantity"] ?? 0);
+    $quantity = ($_POST["quantityAdd"] ?? 0);
     $currentQuantity = $_SESSION["cart"][$id] ?? 0;
     if ($quantity + $currentQuantity <= $products[$_POST["idCart"]]["stock"]){   
         if (!isset($_SESSION["cart"][$id])) {
@@ -93,7 +98,7 @@ if (isset($_SESSION["cart"])) {
         <a href="index.html" class="header__logo">🛍️ MyShop</a>
         <nav class="header__nav">
             <a href="index.html" class="header__nav-link">Home</a>
-            <a href="catalogue.html" class="header__nav-link header__nav-link--active">Catalog</a>
+            <a href="catalog.html" class="header__nav-link header__nav-link--active">Catalog</a>
             <a href="contact.html" class="header__nav-link">Contact</a>
         </nav>
         <div class="header__actions">
@@ -119,7 +124,7 @@ if (isset($_SESSION["cart"])) {
                  JOUR 6 : Formulaire GET + conservation valeurs
                  ============================================ -->
             <aside class="catalog-sidebar">
-                <form method="GET" action="catalogue.php">
+                <form method="GET" action="catalog.php">
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Search</h3>
                         <!-- JOUR 6 : value="<?= e($_GET['nameSearch'] ?? '') ?>" -->
@@ -161,7 +166,7 @@ if (isset($_SESSION["cart"])) {
                     </div>
 
                     <button type="submit" class="btn btn--primary btn--block">Apply</button>
-                    <a href="catalogue.php" class="btn btn--secondary btn--block mt-sm">Reset</a>
+                    <a href="catalog.php" class="btn btn--secondary btn--block mt-sm">Reset</a>
                 </form>
             </aside>
 
@@ -190,7 +195,7 @@ if (isset($_SESSION["cart"])) {
         if ($nameSearch !== '' && stripos($product['name'], $nameSearch) === false) continue;
         if ($maxPrice !== '' && $product['price'] > (float)$maxPrice) continue;
         if ($minPrice !== '' && $product['price'] < (float)$minPrice) continue;
-        if ($inStockOnly && $product['stock'] > 0) continue;
+        if ($inStockOnly && $product['stock'] <= 0) continue;
         if (!empty($categoriesSelected) && !in_array($product['category'], $categoriesSelected)) continue;
 
         $id = $product['id'] ?? '';
@@ -252,10 +257,23 @@ if (isset($_SESSION["cart"])) {
 
             <div class="product-card__actions">
                 <?php if ($stock > 0): ?>
-                    <form action="panier.html" method="POST">
-                        <input type="hidden" name="idCart" value="<?= e((string)$id) ?>">
-                        <input type="number" name="quantityAdd" min="1" value="1">
-                        <button type="submit" class="btn btn--primary btn--block">Add</button>
+                    <form action="cart.php" method="POST">
+                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="idCart" value="<?= $id ?>">
+
+                        <button type="button" onclick="this.nextElementSibling.stepDown()">−</button>
+
+                        <input
+                            type="number"
+                            name="quantityAdd"
+                            value="1"
+                            min="1"
+                            step="1"
+                        >
+
+                        <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
+
+                        <button type="submit">Add</button>
                     </form>
                 <?php else: ?>
                     <button class="btn btn--secondary btn--block" disabled>Unavailable</button>
@@ -285,12 +303,38 @@ if (isset($_SESSION["cart"])) {
 <footer class="footer">
     <div class="container">
         <div class="footer__grid">
-            <div class="footer__section"><h4>À propos</h4><p>MyShop - Shopping en ligne.</p></div>
-            <div class="footer__section"><h4>Navigation</h4><ul><li><a href="index.html">Accueil</a></li><li><a href="catalogue.html">Catalogue</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-            <div class="footer__section"><h4>Compte</h4><ul><li><a href="connexion.html">Connexion</a></li><li><a href="inscription.html">Inscription</a></li><li><a href="panier.html">Panier</a></li></ul></div>
-            <div class="footer__section"><h4>Formation</h4><ul><li><a href="#">Jour 1-5</a></li><li><a href="#">Jour 6-10</a></li><li><a href="#">Jour 11-14</a></li></ul></div>
+            <div class="footer__section">
+                <h4>About</h4>
+                <p>MyShop - Your online shopping destination.</p>
+            </div>
+            <div class="footer__section">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="index.php">Home</a></li>
+                    <li><a href="catalog.php">Catalog</a></li>
+                    <li><a href="contact.php">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer__section">
+                <h4>My account</h4>
+                <ul>
+                    <li><a href="login.php">Login</a></li>
+                    <li><a href="register.php">Register</a></li>
+                    <li><a href="cart.php">My Cart</a></li>
+                </ul>
+            </div>
+            <div class="footer__section">
+                <h4>Formation</h4>
+                <ul>
+                    <li><a href="#">Jour 1-5 : Bases</a></li>
+                    <li><a href="#">Jour 6-10 : Avancé</a></li>
+                    <li><a href="#">Jour 11-14 : Pro</a></li>
+                </ul>
+            </div>
         </div>
-        <div class="footer__bottom"><p>&copy; 2024 MyShop</p></div>
+        <div class="footer__bottom">
+            <p>&copy; <?= date('Y') ?> MyShop - Formation PHP 14 jours</p>
+        </div>
     </div>
 </footer>
 

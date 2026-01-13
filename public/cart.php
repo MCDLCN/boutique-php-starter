@@ -1,8 +1,9 @@
 <?php
+require_once __DIR__ . "/../app/helpers.php";
 session_start();
 try {
     $pdo = new PDO(
-        "mysql:host=localhost;dbname=boutique;charset=utf8mb4",
+        "mysql:host=localhost;dbname=shop;charset=utf8mb4",
         "dev",
         "dev",
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
@@ -12,46 +13,133 @@ try {
 }
 
 
-
-if (isset($_POST['idRemove'])) {
-    $id = $_POST['idRemove'];       
-    unset($_SESSION['cart'][$id]);
-}
-
-if (isset($_POST['emptyCart'])) {
-unset($_SESSION['cart']);   
-}
-
 if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-    $products= $_SESSION["cart"];
     $ids = array_keys($_SESSION['cart']);
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
     $stmt = $pdo->prepare(
-    "SELECT id, name, price, stock FROM products WHERE id IN ($placeholders)"
+    "SELECT * FROM products WHERE id IN ($placeholders)"
 );
 
 $stmt->execute($ids);
 $productsInCart = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-if (isset($_POST['idUpdate'])) {
-    $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = ?");
-    $stmt->execute([(int)$_POST['idUpdate']]);
-    $stock = (int)$stmt->fetchColumn();
-    $quantity = ($_POST["quantity"] ?? 0);
-    $currentQuantity = $_SESSION['cart'][$_POST['idUpdate']];
-    if ($quantity + $currentQuantity <= $stock){
-        $id = $_POST['idUpdate'];   
-        $quantity = $_POST['quantity'];
-        $_SESSION['cart'][$id] = $quantity;
-    }else{
-        echo "alert ('Not enough stock')";
-    }
 }
 
+
+$action = $_POST['action'] ?? '';
+
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+if ($action === 'add') {
+    $id  = (int)($_POST['idCart'] ?? 0);
+    $quantity = (int)($_POST['quantityAdd'] ?? 1);
+    var_dump($quantity);
+    $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = ?");
+    $stmt->execute([$id]);
+    $stock = (int)$stmt->fetchColumn();
+
+    $currentQuantity = $_SESSION['cart'][$id] ?? 0;
+
+    if ($id > 0 && $quantity > 0 && ($currentQuantity + $quantity) <= $stock) {
+        $_SESSION['cart'][$id] = $currentQuantity + $quantity;
+        $_SESSION['flash'] = 'Added to cart';
+        header('Location: catalog.php');
+        exit;
+    } else {
+        header('Location: catalog.php');
+        $_SESSION['flash'] = 'Not enough stock';
+        exit;
+    }
+
+    
+}
+
+if ($action === 'update') {
+    $id  = (int)($_POST['idUpdate'] ?? 0);
+    $quantity = (int)($_POST['quantity'] ?? 1);
+
+    $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = ?");
+    $stmt->execute([$id]);
+    $stock = (int)$stmt->fetchColumn();
+
+    if ($id > 0 && $quantity > 0) {
+        $_SESSION['cart'][$id] = min($quantity, $stock);
+    }
+
+    header('Location: cart.php');
+    exit;
+}
+
+if ($action === 'remove') {
+    $id = (int)($_POST['idRemove'] ?? 0);
+
+    if ($id > 0) {
+        unset($_SESSION['cart'][$id]);
+    }
+
+    header('Location: cart.php');
+    exit;
+}
+
+if ($action === 'emptyCart') {
+    unset($_SESSION['cart']);
+    header('Location: cart.php');
+    exit;
+}
+
+//Old code
+// if (isset($_POST["idCart"])) {
+//     $id = $_POST["idCart"];
+//     $quantity = ($_POST["quantityAdd"] ?? 0);
+//     $currentQuantity = $_SESSION["cart"][$id] ?? 0;
+//     $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = ?");
+//     $stmt->execute([$id]);
+//     $stock = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//     if ($quantity + $currentQuantity <= $stock{   
+//         if (!isset($_SESSION["cart"][$id])) {
+//             $_SESSION["cart"][$id] = intval($quantity);
+//             echo "<script>alert ('Added to cart')</script>";
+//         } else {
+//             $_SESSION["cart"][$id] = $_SESSION["cart"][$id] + $quantity;
+//             echo "<script>alert ('Added to cart')</script>";
+//         }
+//     }else {
+//     echo "<script>alert ('Not enough stock')</script>";
+//     }
+// }
+
+
+
+// if (isset($_POST['remove'])) {
+//     $id = $_POST['idRemove'];       
+//     unset($_SESSION['cart'][$id]);
+// }
+
+// if (isset($_POST['emptyCart'])) {
+// unset($_SESSION['cart']);   
+// }
+
+// if (isset($_POST['update'])) {
+//     $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = ?");
+//     $stmt->execute([(int)$_POST['idUpdate']]);
+//     $stock = (int)$stmt->fetchColumn();
+//     $quantity = ($_POST["quantityToAdd"] ?? 0);
+//     $currentQuantity = $_SESSION['cart'][$_POST['idUpdate']];
+//     if ($quantity + $currentQuantity <= $stock && $quantity + $currentQuantity > 0) {
+//         $id = $_POST['idUpdate'];   
+//         $quantity = $_POST['quantity'];
+//         $_SESSION['cart'][$id] = $quantity;
+//     }else{
+//         echo "alert ('Not enough stock')";
+//     }
+// }
+
 //var_dump($productsInCart);
-echo '<br>';
+//echo '<br>';
 //var_dump($products);
+
+//Actual total of products in the cart
 if (!isset($_SESSION["totalItemsCart"])) {
     $_SESSION["totalItemsCart"] = 0;
 }
@@ -60,24 +148,27 @@ $_SESSION["totalItemsCart"] = 0;
 foreach ($_SESSION["cart"] as $key => $value) {
          $_SESSION["totalItemsCart"] += $value ;}
 
-
+//Total price of products in the cart
 $_SESSION['totalCart'] = 0;
 foreach ($_SESSION["cart"] as $key => $value) {
     $stmt = $pdo->prepare("SELECT price FROM products WHERE id = ?");
     $stmt->execute([$key]);
     $price = $stmt->fetchColumn();
-    $_SESSION['totalCart'] += $price * $value;
+    $stmt = $pdo->prepare("SELECT discount FROM products WHERE id = ?");
+    $stmt->execute([$key]);
+    $discount = $stmt->fetchColumn();
+    $_SESSION['totalCart'] += $price * $value * (1 - $discount / 100);
 }
-}
+
 ?>
 
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Panier - MaBoutique</title>
+    <title>My cart - MyShop</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -90,20 +181,21 @@ foreach ($_SESSION["cart"] as $key => $value) {
     <div class="container header__container">
         <a href="index.html" class="header__logo">
             <span>🛍️</span>
-            <span>MaBoutique</span>
+            <span>MyShop</span>
         </a>
         <nav class="header__nav">
-            <a href="index.html" class="header__nav-link">Accueil</a>
-            <a href="catalogue.html" class="header__nav-link">Catalogue</a>
-            <a href="contact.html" class="header__nav-link">Contact</a>
+            <a href="index.php" class="header__nav-link">Home</a>
+            <a href="catalog.php" class="header__nav-link">Catalog</a>
+            <a href="contact.php" class="header__nav-link">Contact</a>
         </nav>
         <div class="header__actions">
-            <a href="panier.html" class="header__cart">
+            <a href="cart.php" class="header__cart">
                 🛒
-                <!-- JOUR 7 : <?= count($_SESSION['cart'] ?? []) ?> -->
+                <!-- JOUR 7 :  -->
+                <?= count($_SESSION['cart'] ?? []) ?>
                 <span class="header__cart-badge">3</span>
             </a>
-            <a href="connexion.html" class="btn btn--primary btn--sm">Connexion</a>
+            <a href="login.php" class="btn btn--primary btn--sm">Log in</a>
         </div>
         <button class="header__menu-toggle">☰</button>
     </div>
@@ -113,9 +205,9 @@ foreach ($_SESSION["cart"] as $key => $value) {
     <div class="container">
 
         <div class="page-header">
-            <h1 class="page-title">Mon Panier</h1>
-            <!-- JOUR 7 : <?= count($_SESSION['cart']) ?> articles -->
-            <p class="page-subtitle">3 articles dans votre panier</p>
+            <h1 class="page-title">My cart</h1>
+            <!-- JOUR 7 :  articles -->
+            <p class="page-subtitle"><?= count($_SESSION['cart'] ?? []) ?> items in your cart </p>
         </div>
 
         <!-- ============================================
@@ -142,122 +234,88 @@ foreach ($_SESSION["cart"] as $key => $value) {
              PANIER AVEC ARTICLES
              JOUR 7 : foreach sur $_SESSION['cart']
              ============================================ -->
+        <?php if (!empty($_SESSION['cart'])): ?>
         <div class="cart-layout">
             <div class="cart-table">
                 <table>
                     <thead>
                         <tr>
-                            <th>Produit</th>
-                            <th>Prix</th>
-                            <th>Quantité</th>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
                             <th>Total</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- JOUR 7 : <?php foreach ($_SESSION['cart'] as $productId => $item): ?> -->
                         <!-- JOUR 7 : Récupérer les infos produit depuis la BDD -->
 
                         <!-- Article 1 -->
+                        <?php foreach ($productsInCart as $product ): ?>
                         <tr>
                             <td>
                                 <div class="cart-item">
                                     <div class="cart-item__image">
-                                        <img src="https://via.placeholder.com/100x100/e2e8f0/64748b?text=T-shirt" alt="T-shirt">
+                                        <img src="<?= e($product["image"])?>" alt="<?= e($product["name"])?>">
                                     </div>
                                     <div>
-                                        <!-- JOUR 7 : <?= htmlspecialchars($product['name']) ?> -->
-                                        <div class="cart-item__title">T-shirt Premium Bio</div>
-                                        <!-- JOUR 7 : <?= htmlspecialchars($product['category']) ?> -->
-                                        <div class="cart-item__category">Vêtements</div>
+                                        <!-- JOUR 7 :  -->
+                                        <div class="cart-item__title"><?= e($product['name']) ?></div>
+                                        <div class="cart-item__category"><?= e($product['category']) ?></div>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <!-- JOUR 5 : <?= formatPrice($product['price']) ?> -->
-                                35,99 €
+                                <?= formatPrice($product['price']*(1 - $product['discount']/100)) ?>
                             </td>
                             <td>
                                 <!-- JOUR 7 : Formulaire pour modifier la quantité -->
-                                <form action="panier.html" method="POST" style="display:inline">
-                                    <input type="hidden" name="product_id" value="1">
+                                <form action="cart.php" method="POST" style="display:inline">
                                     <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="idUpdate" value="<?= $product['id'] ?>">
+
                                     <div class="quantity-selector">
-                                        <button type="submit" name="quantity" value="1" class="quantity-selector__btn">−</button>
-                                        <!-- JOUR 7 : value="<?= $item['quantity'] ?>" -->
-                                        <input type="number" name="quantity" value="2" min="1" class="quantity-selector__input" style="width:50px">
-                                        <button type="submit" name="quantity" value="3" class="quantity-selector__btn">+</button>
+                                        <button type="button" onclick="this.nextElementSibling.stepDown()">−</button>
+
+                                        <input
+                                            type="number"
+                                            name="quantity"
+                                            value="<?= $_SESSION['cart'][$product['id']] ?>"
+                                            min="1"
+                                            style="width:50px"
+                                        >
+
+                                        <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
                                     </div>
+
+                                    <button type="submit">Update</button>
                                 </form>
                             </td>
-                            <td>
-                                <!-- JOUR 5 : <?= formatPrice($product['price'] * $item['quantity']) ?> -->
-                                <span class="cart-item__total">71,98 €</span>
+                            <td>    
+                                <span class="cart-item__total"><?= formatPrice($product['price']*$_SESSION['cart'][$product['id']] * (1 - $product['discount']/100)) ?></span>
                             </td>
                             <td>
                                 <!-- JOUR 7 : Formulaire pour supprimer -->
-                                <form action="panier.html" method="POST" style="display:inline">
-                                    <input type="hidden" name="product_id" value="1">
+                                <form action="cart.php" method="POST" style="display:inline">
+                                    <input type="hidden" name="idRemove" value="<?= $product['id']?>">
                                     <input type="hidden" name="action" value="remove">
-                                    <button type="submit" class="cart-item__remove" title="Supprimer">🗑️</button>
+                                    <button type="submit" class="cart-item__remove" title="Remove">🗑️</button>
                                 </form>
                             </td>
                         </tr>
-
-                        <!-- Article 2 -->
-                        <tr>
-                            <td>
-                                <div class="cart-item">
-                                    <div class="cart-item__image">
-                                        <img src="https://via.placeholder.com/100x100/e2e8f0/64748b?text=Sneakers" alt="Sneakers">
-                                    </div>
-                                    <div>
-                                        <div class="cart-item__title">Sneakers Urban</div>
-                                        <div class="cart-item__category">Chaussures</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <!-- Prix avec promo -->
-                                <span style="text-decoration: line-through; color: #94a3b8;">99,99 €</span>
-                                <br>79,99 €
-                            </td>
-                            <td>
-                                <form action="panier.html" method="POST" style="display:inline">
-                                    <input type="hidden" name="product_id" value="2">
-                                    <input type="hidden" name="action" value="update">
-                                    <div class="quantity-selector">
-                                        <button type="submit" name="quantity" value="0" class="quantity-selector__btn">−</button>
-                                        <input type="number" name="quantity" value="1" min="1" class="quantity-selector__input" style="width:50px">
-                                        <button type="submit" name="quantity" value="2" class="quantity-selector__btn">+</button>
-                                    </div>
-                                </form>
-                            </td>
-                            <td>
-                                <span class="cart-item__total">79,99 €</span>
-                            </td>
-                            <td>
-                                <form action="panier.html" method="POST" style="display:inline">
-                                    <input type="hidden" name="product_id" value="2">
-                                    <input type="hidden" name="action" value="remove">
-                                    <button type="submit" class="cart-item__remove" title="Supprimer">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
-
-                        <!-- JOUR 7 : <?php endforeach; ?> -->
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
 
                 <div class="cart-actions">
-                    <a href="catalogue.html" class="btn btn--outline">
-                        ← Continuer mes achats
+                    <a href="catalog.php" class="btn btn--outline">
+                        ← Continue my shopping
                     </a>
                     <!-- JOUR 7 : Formulaire pour vider le panier -->
-                    <form action="panier.html" method="POST" style="display:inline">
-                        <input type="hidden" name="action" value="clear">
+                    <form action="cart.php" method="POST" style="display:inline">
+                        <input type="hidden" name="action" value="emptyCart">
                         <button type="submit" class="btn btn--danger">
-                            🗑️ Vider le panier
+                            🗑️ Empty the cart
                         </button>
                     </form>
                 </div>
@@ -271,39 +329,49 @@ foreach ($_SESSION["cart"] as $key => $value) {
                 <h3 class="cart-summary__title">Summing up</h3>
 
                 <div class="cart-summary__row">
-                    <span>Sous-total</span>
-                    <!-- JOUR 5 : <?= formatPrice($subtotal) ?> -->
-                    <span>151,97 €</span>
+                    <span>Sub-total</span>
+                    <span><?= formatPrice($_SESSION['totalCart']) ?></span>
                 </div>
                 <div class="cart-summary__row">
-                    <!-- JOUR 5 : <?= formatPrice($subtotal * 0.2) ?> -->
-                    <span>TVA (20%)</span>
-                    <span>30,39 €</span>
+                    <span>VAT (20%)</span>
+                    <span><?= formatPrice($_SESSION['totalCart']*0.2) ?></span>
                 </div>
                 <div class="cart-summary__row">
-                    <span>Livraison</span>
+                    <span>Delivery</span>
                     <!-- JOUR 4 : Gratuit si > 50€ -->
-                    <span style="color: #22c55e;">Gratuit</span>
+                    <?php if ($_SESSION['totalCart'] > 50): ?>
+                        <?php $freeDelivery = true; ?>
+                         <span style="color: #22c55e;">Free</span>
+                    <?php else: ?>
+                        <?php $freeDelivery = false; ?>
+                        <span style="color: #C52289;">5,99$</span>
+                    <?php endif; ?>
                 </div>
                 <div class="cart-summary__row cart-summary__row--total">
-                    <span>Total TTC</span>
-                    <!-- JOUR 5 : <?= formatPrice($total) ?> -->
-                    <span>151,97 €</span>
+                    <span>Total ATI</span>
+                    <?php if ($freeDelivery): ?>
+                        <span><?= formatPrice($_SESSION['totalCart']+$_SESSION['totalCart']*0.2) ?></span>
+                    <?php else: ?>
+                        <span><?= formatPrice($_SESSION['totalCart']+$_SESSION['totalCart']*0.2+5.99) ?></span>
+                    <?php endif; ?>
                 </div>
 
                 <div class="cart-summary__checkout">
                     <!-- JOUR 7 : Vérifier si user connecté -->
-                    <a href="connexion.html" class="btn btn--primary btn--block btn--lg">
-                        Procéder au paiement
-                    </a>
-                    <p class="form-hint text-center mt-sm">
-                        <!-- JOUR 7 : Si non connecté -->
-                        Vous devez être connecté pour commander
+                    <?php if (isset($_SESSION['auth'])): ?>
+                        <a href="checkout.php" class="btn btn--primary btn--block btn--lg">
+                            Proceed to payment
+                        </a>
+                    <?php else: ?>
+                        <a href="login.php" class="btn btn--primary btn--block btn--lg">
+                            You need to be logged in to proceed
+                        </a>
+                    <?php endif; ?>
                     </p>
                 </div>
             </aside>
         </div>
-
+        <?php endif; ?> 
         <!-- ============================================
              PANIER VIDE (template alternatif)
              JOUR 7 : 
@@ -359,7 +427,6 @@ foreach ($_SESSION["cart"] as $key => $value) {
             </div>
         </div>
         <div class="footer__bottom">
-            <!-- JOUR 1 : Remplacer 2024 par <?= date('Y') ?> -->
             <p>&copy; <?= date('Y') ?> MyShop - Formation PHP 14 jours</p>
         </div>
     </div>
