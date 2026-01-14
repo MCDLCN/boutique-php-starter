@@ -1,6 +1,7 @@
 <?php
 class Category
 {
+    private static array $pool = [];
     private int $count = 0;
     public function __construct(
         private string $name
@@ -19,5 +20,11 @@ class Category
     public function getCount(): int
     {
         return $this->count;
+    }
+
+    public static function fromName(string $name): self
+    {
+        $key=mb_strtolower(trim($name));
+        return self::$pool['key']??=new self($name);
     }
 }

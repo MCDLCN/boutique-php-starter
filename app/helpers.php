@@ -17,8 +17,14 @@ function calculateTotal(array $cart) : float{
 function displayBadge(string $text, string $colour) : string {
 	return '<span class="badge" style="background:'.$colour.'">'.$text.'</span>';
 }
-function formatPrice( float $amount) : string {
-	return number_format($amount,2, ",", " ").'$';
+function truncate(float $value, int $decimals = 2): float {
+    $factor = 10 ** $decimals;
+    return floor($value * $factor) / $factor;
+}
+function formatPrice(float $amount): string {
+	$amount=truncate($amount);
+    $amount = floor($amount * 100) / 100;
+    return number_format($amount, 2, ',', ' ') . '$';
 }
 
 function formatDate (string $date) : string {

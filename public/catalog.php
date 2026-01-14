@@ -10,6 +10,13 @@ foreach ($files as $file) {
 }
 
 session_start();
+function getCart(): Cart {
+    if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
+        $_SESSION['cart'] = new Cart();
+    }
+    return $_SESSION['cart'];
+}
+$cart = getCart();
 
 try {
     $pdo = new PDO(
@@ -21,6 +28,7 @@ try {
 } catch (PDOException $e) {
     die("DB error");
 }
+
 
 // Flash message (from cart actions)
 if (isset($_SESSION['flash'])) {
@@ -125,7 +133,7 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
             <a href="contact.html" class="header__nav-link">Contact</a>
         </nav>
         <div class="header__actions">
-            <a href="cart.php" class="header__cart">🛒<span class="header__cart-badge"><?= (int)($_SESSION['totalItemsCart'] ?? 0) ?></span></a>
+            <a href="cart.php" class="header__cart">🛒<span class="header__cart-badge"><?= (int)(getCart()->countUnique() ?? 0) ?></span></a>
             <a href="connexion.html" class="btn btn--primary btn--sm">Log in</a>
         </div>
         <button class="header__menu-toggle">☰</button>

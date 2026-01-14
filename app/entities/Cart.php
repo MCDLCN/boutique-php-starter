@@ -37,7 +37,7 @@ class Cart
         return $total;
     }
     
-    public function count(): int
+    public function countUnique(): int
     {
         return count($this->items);
     }
@@ -45,5 +45,29 @@ class Cart
     public function clear(): void
     {
         $this->items = [];
+    }
+
+    public function getCartItem(int $id): ?CartItem{
+        return $this->items[$id];
+    }
+
+    public function isEmpty(): bool{
+        return empty($this->items);
+    }
+
+    public function setProduct(Product $product): void
+    {
+        $id = $product->getId();
+        if (!isset($this->items[$id])) return;
+        $this->items[$id] = new CartItem($product, $this->items[$id]->getQuantity());
+    }
+
+    public function countAllItems(): int 
+    {
+        $total = 0;
+        foreach ($this->items as $item){
+            $total += $item->getQuantity();
+        }
+        return $total;
     }
 }

@@ -11,6 +11,14 @@ foreach ($files as $file) {
 
 session_start();
 
+function getCart(): Cart {
+    if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
+        $_SESSION['cart'] = new Cart();
+    }
+    return $_SESSION['cart'];
+}
+$cart = getCart();
+
 try {
     $pdo = new PDO(
         "mysql:host=localhost;dbname=shop;charset=utf8mb4",
@@ -26,6 +34,11 @@ if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
+
+/** @var array<string,Category> $categoryPool */
+$categoryPool = [];
+
+
 $action = $_POST['action'] ?? '';
 
 function fetchProduct(PDO $pdo, int $id): ?Product {
@@ -33,6 +46,8 @@ function fetchProduct(PDO $pdo, int $id): ?Product {
     $stmt->execute([$id]);
     $r = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$r) return null;
+    
+    $category = Category::fromName($r["category"]);
 
     return new Product(
         (int)$r['id'],
@@ -40,7 +55,7 @@ function fetchProduct(PDO $pdo, int $id): ?Product {
         (string)($r['description'] ?? ''),
         (float)$r['price'],
         (int)$r['stock'],
-        (string)($r['category'] ?? ''),
+        $category,
         (int)($r['discount'] ?? 0),
         (string)($r['image'] ?? ''),
         (string)($r['dateAdded'] ?? '')
@@ -56,16 +71,20 @@ if ($action === 'add') {
         $_SESSION['flash'] = 'Product not found';
         header('Location: catalog.php'); exit;
     }
-
-    $current = (int)($_SESSION['cart'][$id] ?? 0);
-
-    if ($product->canAddToCart($qty, $current)) {
-        $_SESSION['cart'][$id] = $current + $qty;
-        $_SESSION['flash'] = 'Added to cart';
-    } else {
-        $_SESSION['flash'] = 'Not enough stock';
+    if ($cart->getCartItem($id) !== null) {
+        $current = $cart->getCartItem(id: $id)->getQuantity();
+        if ($product->canAddToCart($qty, $current)) {
+            $cart->getCartItem($id)->setQuantity($current + $qty);
+            $_SESSION['flash'] = 'Added to cart';}
+        else {
+        $_SESSION['flash'] = 'Not enough stock';}
+    } 
+    else {
+        if ($product->canAddToCart($qty, 0)) {
+            $cart->addProduct($product, $qty);}
+        else {
+        $_SESSION['flash'] = 'Not enough stock';}
     }
-
     header('Location: catalog.php');
     exit;
 }
@@ -73,23 +92,23 @@ if ($action === 'add') {
 if ($action === 'update') {
     $id = (int)($_POST['idUpdate'] ?? 0);
     $qty = (int)($_POST['quantity'] ?? 1);
-
+    $cart = getCart();
     if ($id <= 0) { header('Location: cart.php'); exit; }
 
     $product = fetchProduct($pdo, $id);
     if (!$product) {
-        unset($_SESSION['cart'][$id]);
-        $_SESSION['flash'] = 'Product removed (not found)';
+        $cart->removeProduct($id);
+        $_SESSION['flash'] = "Product removed (Doesn't exist)";
         header('Location: cart.php'); exit;
     }
 
     if ($qty < 1) {
-        unset($_SESSION['cart'][$id]);
+        $cart->removeProduct($id);
         $_SESSION['flash'] = 'Item removed';
         header('Location: cart.php'); exit;
     }
 
-    $_SESSION['cart'][$id] = min($qty, $product->stock);
+    $cart->getCartItem($id)->setQuantity(min($qty, $product->getStock()));
     $_SESSION['flash'] = 'Cart updated';
     header('Location: cart.php');
     exit;
@@ -97,25 +116,29 @@ if ($action === 'update') {
 
 if ($action === 'remove') {
     $id = (int)($_POST['idRemove'] ?? 0);
-    if ($id > 0) unset($_SESSION['cart'][$id]);
+    if ($id > 0) getCart()->removeProduct($id);
     $_SESSION['flash'] = 'Item removed';
     header('Location: cart.php');
     exit;
 }
 
 if ($action === 'emptyCart') {
-    $_SESSION['cart'] = [];
+    getCart()->clear();
     $_SESSION['flash'] = 'Cart emptied';
     header('Location: cart.php');
     exit;
 }
 
 // Build cart view data (Products in cart)
-$productsInCart = [];
-if (!empty($_SESSION['cart'])) {
-    $ids = array_keys($_SESSION['cart']);
+
+$cart = getCart();
+
+if (!$cart->isEmpty()) {
+    $ids = array_keys($cart->getItems());
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = $pdo->prepare("SELECT id, name, description, price, stock, category, discount, image, dateAdded FROM products WHERE id IN ($placeholders)");
+
+    $stmt = $pdo->prepare("SELECT id, name, description, price, stock, category, discount, image, dateAdded
+                           FROM products WHERE id IN ($placeholders)");
     $stmt->execute($ids);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -123,35 +146,28 @@ if (!empty($_SESSION['cart'])) {
     foreach ($rows as $r) $byId[(int)$r['id']] = $r;
 
     foreach ($ids as $id) {
-        if (!isset($byId[(int)$id])) {
-            unset($_SESSION['cart'][(int)$id]);
+        if (!isset($byId[$id])) {
+            $cart->removeProduct($id);
             continue;
         }
-        $r = $byId[(int)$id];
-        $productsInCart[] = new Product(
+
+        $r = $byId[$id];
+        $category = Category::fromName($r["category"]);
+        $cart->setProduct(new Product(
             (int)$r['id'],
             (string)$r['name'],
             (string)($r['description'] ?? ''),
             (float)$r['price'],
             (int)$r['stock'],
-            (string)($r['category'] ?? ''),
+            $category,
             (int)($r['discount'] ?? 0),
             (string)($r['image'] ?? ''),
             (string)($r['dateAdded'] ?? '')
-        );
+        ));
     }
 }
 
-// Totals
-$_SESSION['totalItemsCart'] = 0;
-foreach ($_SESSION['cart'] as $q) $_SESSION['totalItemsCart'] += (int)$q;
-
-$totalCart = 0.0;
-foreach ($productsInCart as $p) {
-    $qty = (int)($_SESSION['cart'][$p->getId()] ?? 0);
-    $totalCart += $p->getFinalPrice() * $qty;
-}
-$_SESSION['totalCart'] = $totalCart;
+$totalCart = $cart->getTotal();
 
 $freeDelivery = $totalCart > 50;
 ?>
@@ -179,7 +195,7 @@ $freeDelivery = $totalCart > 50;
         <div class="header__actions">
             <a href="cart.php" class="header__cart">
                 🛒
-                <span class="header__cart-badge"><?= (int)($_SESSION['totalItemsCart'] ?? 0) ?></span>
+                <span class="header__cart-badge"><?= (int)(getCart()->countUnique()) ?></span>
             </a>
             <a href="login.php" class="btn btn--primary btn--sm">Log in</a>
         </div>
@@ -192,7 +208,7 @@ $freeDelivery = $totalCart > 50;
 
         <div class="page-header">
             <h1 class="page-title">My cart</h1>
-            <p class="page-subtitle"><?= (int)($_SESSION['totalItemsCart'] ?? 0) ?> items in your cart</p>
+            <p class="page-subtitle"><?= (int)(getCart()->countAllItems()) ?> items in your cart</p>
         </div>
 
         <?php if (isset($_SESSION['flash'])): ?>
@@ -202,7 +218,7 @@ $freeDelivery = $totalCart > 50;
             <?php unset($_SESSION['flash']); ?>
         <?php endif; ?>
 
-        <?php if (!empty($_SESSION['cart'])): ?>
+        <?php if (!$cart->isEmpty()): ?>
         <div class="cart-layout">
             <div class="cart-table">
                 <table>
@@ -216,31 +232,35 @@ $freeDelivery = $totalCart > 50;
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($productsInCart as $p): ?>
-                            <?php $qty = (int)($_SESSION['cart'][$p->getId()] ?? 0); ?>
+                        <?php foreach ($cart->getItems() as $item): ?>
+                            <?php 
+                                //var_dump($item);
+                                $qty = (int)$item->getQuantity(); 
+                                $product = $item->getProduct();
+                            ?>
                             <tr>
                                 <td>
                                     <div class="cart-item">
                                         <div class="cart-item__image">
-                                            <img src="<?= e($p->getImage()) ?>" alt="<?= e($p->name) ?>">
+                                            <img src="<?= e($product->getImage()) ?>" alt="<?= e($product->getName()) ?>">
                                         </div>
                                         <div>
-                                            <div class="cart-item__title"><?= e($p->name) ?></div>
-                                            <div class="cart-item__category"><?= e($p->category) ?></div>
+                                            <div class="cart-item__title"><?= e($product->getname()) ?></div>
+                                            <div class="cart-item__category"><?= e($product->getCategory()->getName()) ?></div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <?= formatPrice($p->getFinalPrice()) ?>
+                                    <?= formatPrice($product->getFinalPrice())?>
                                 </td>
                                 <td>
                                     <form action="cart.php" method="POST" style="display:inline">
                                         <input type="hidden" name="action" value="update">
-                                        <input type="hidden" name="idUpdate" value="<?= (int)$p->getId() ?>">
+                                        <input type="hidden" name="idUpdate" value="<?= (int)$product->getId() ?>">
 
                                         <div class="quantity-selector">
                                             <button type="button" onclick="this.nextElementSibling.stepDown()">−</button>
-                                            <input type="number" name="quantity" value="<?= $qty ?>" min="1" max="<?= (int)$p->stock ?>" style="width:50px">
+                                            <input type="number" name="quantity" value="<?= $qty ?>" min="1" max="<?= (int)$product->getStock() ?>" style="width:50px">
                                             <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
                                         </div>
 
@@ -248,12 +268,12 @@ $freeDelivery = $totalCart > 50;
                                     </form>
                                 </td>
                                 <td>
-                                    <span class="cart-item__total"><?= formatPrice($p->getFinalPrice() * $qty) ?></span>
+                                    <span class="cart-item__total"><?= formatPrice($item->getTotal()) ?></span>
                                 </td>
                                 <td>
                                     <form action="cart.php" method="POST" style="display:inline" onsubmit="return confirm('Remove this item?');">
                                         <input type="hidden" name="action" value="remove">
-                                        <input type="hidden" name="idRemove" value="<?= (int)$p->getId() ?>">
+                                        <input type="hidden" name="idRemove" value="<?= (int)$product->getId() ?>">
                                         <button type="submit" class="cart-item__remove" title="Remove">🗑️</button>
                                     </form>
                                 </td>
