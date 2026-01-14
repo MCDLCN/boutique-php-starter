@@ -3,7 +3,11 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/helpers.php';
-require_once __DIR__ . '/../app/Entity/Product.php';
+$files = glob(__DIR__ . '/../app/entities/*.php');
+
+foreach ($files as $file) {
+    require_once($file);   
+}
 
 session_start();
 
@@ -30,38 +34,43 @@ $stmt->execute();
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 /** @var Product[] $products */
+
+$categoryPool = [];
 $products = [];
 foreach ($rows as $r) {
+    $catName = (string)($r['category'] ?? ''); 
+    if (!isset($categoryPool[$catName])) {
+        $categoryPool[$catName] = new Category($catName);
+    }
+
+    $category = $categoryPool[$catName];
+    $category->increaseCount();
+
     $products[] = new Product(
         (int)$r['id'],
         (string)$r['name'],
         (string)($r['description'] ?? ''),
         (float)$r['price'],
         (int)$r['stock'],
-        (string)($r['category'] ?? ''),
+        $category,
         (int)($r['discount'] ?? 0),
         (string)($r['image'] ?? ''),
         (string)($r['dateAdded'] ?? '')
     );
 }
 
+
 // Counters + category counts
 $inStock = 0;
 $onSale = 0;
 $outOfStock = 0;
-$categoryCounts = [];
 
 foreach ($products as $p) {
     $p->isInStock() ? $inStock++ : $outOfStock++;
     if ($p->isOnSale()) $onSale++;
-
-    $cat = $p->category;
-    if ($cat !== '') {
-        $categoryCounts[$cat] = ($categoryCounts[$cat] ?? 0) + 1;
-    }
 }
 
-$categoriesSide = array_values(array_unique(array_map(fn(Product $p) => $p->category, $products)));
+//$categoriesSide = array_values(array_unique(array_map(fn(Product $p) => $p->getCategory()-, $products)));
 
 // Filters (GET)
 $selectedCategories = $_GET['categories'] ?? [];
@@ -75,9 +84,9 @@ $inStockOnly = isset($_GET['in_stock']);
 $filtered = [];
 
 foreach ($products as $p) {
-    if ($nameSearch !== '' && stripos($p->name, $nameSearch) === false) continue;
+    if ($nameSearch !== '' && stripos($p->getName(), $nameSearch) === false) continue;
     if ($inStockOnly && !$p->isInStock()) continue;
-    if (!empty($selectedCategories) && !in_array($p->category, $selectedCategories, true)) continue;
+    if (!empty($selectedCategories) && !in_array($p->getCategory()->getName(), $selectedCategories, true)) continue;
     if ($maxPrice !== '' && $p->getFinalPrice() > (float)$maxPrice) continue;
     if ($minPrice !== '' && $p->getFinalPrice() < (float)$minPrice) continue;
 
@@ -88,8 +97,8 @@ $sort = $_GET['sort'] ?? '';
 
 usort($filtered, function (Product $a, Product $b) use ($sort) {
     return match ($sort) {
-        'az'         => strcasecmp($a->name, $b->name),
-        'za'         => strcasecmp($b->name, $a->name),
+        'az'         => strcasecmp($a->getName(), $b->getName()),
+        'za'         => strcasecmp($b->getName(), $a->getName()),
         'price_asc'  => $a->getFinalPrice() <=> $b->getFinalPrice(),
         'price_desc' => $b->getFinalPrice() <=> $a->getFinalPrice(),
         default      => 0,
@@ -142,10 +151,10 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Categories</h3>
                         <div class="catalog-sidebar__categories">
-                            <?php foreach ($categoriesSide as $cat): ?>
+                            <?php foreach ($categoryPool as $cat): ?>
                                 <label class="form-checkbox">
-                                    <input type="checkbox" name="categories[]" value="<?= e($cat) ?>" <?= in_array($cat, $selectedCategories, true) ? 'checked' : '' ?>>
-                                    <span><?= e($cat) ?> (<?= (int)($categoryCounts[$cat] ?? 0) ?>)</span>
+                                    <input type="checkbox" name="categories[]" value="<?= $cat->getName() ?>" <?= in_array($cat->getName(), $selectedCategories, true) ? 'checked' : '' ?>>
+                                    <span><?= e($cat->getName()) ?> (<?= (int)$cat->getCount() ?>)</span>
                                 </label>
                             <?php endforeach; ?>
                         </div>
@@ -195,10 +204,10 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
 
                 <div class="products-grid">
                     <?php foreach ($filtered as $p): ?>
-                        <?php $stock = $p->stock; ?>
+                        <?php $stock = $p->getStock(); ?>
                         <article class="product-card">
                             <div class="product-card__image-wrapper">
-                                <img src="<?= e($p->getImage()) ?>" alt="<?= e($p->name) ?>" class="product-card__image">
+                                <img src="<?= e($p->getImage()) ?>" alt="<?= e($p->getName()) ?>" class="product-card__image">
                                 <div class="product-card__badges">
                                     <?php if ($p->isNew()): ?>
                                         <span class="badge badge--new">New</span>
@@ -219,9 +228,9 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
                             </div>
 
                             <div class="product-card__content">
-                                <span class="product-card__category"><?= e($p->category) ?></span>
+                                <span class="product-card__category"><?= e($p->getCategory()->getName()) ?></span>
                                 <a href="product.php?id=<?= urlencode((string)$p->getId()) ?>" class="product-card__title">
-                                    <?= e($p->name) ?>
+                                    <?= e($p->getName()) ?>
                                 </a>
 
                                 <div class="product-card__price">

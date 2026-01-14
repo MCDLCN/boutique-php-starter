@@ -4,11 +4,11 @@ class Product
 {
     public function __construct(
         private int $id,
-        public string $name,
-        public string $description,
+        private string $name,
+        private string $description,
         private float $price,
-        public int $stock,
-        public string $category,
+        private int $stock,
+        private Category $category,
         private int $discount,
         private string $image,
         private string $dateAdded
@@ -19,14 +19,29 @@ class Product
         return $this->id;
     }
 
+    public function getName(): string
+    {
+        return $this->name;   
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;   
+    }
+
     public function getPrice(): float
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): void
+    public function getStock(): int
     {
-        $this->price = $price;
+        return $this->stock;   
+    }
+
+    public function getCategory(): Category
+    {
+        return $this->category;   
     }
 
     public function getDiscount(): int

@@ -3,7 +3,11 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/helpers.php';
-require_once __DIR__ . '/../app/Entity/Product.php';
+$files = glob(__DIR__ . '/../app/entities/*.php');
+
+foreach ($files as $file) {
+    require_once($file);   
+}
 
 session_start();
 
