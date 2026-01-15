@@ -1,51 +1,76 @@
 <?php
-class Cart{
+
+class CartItem {
     public function __construct(
-        public array $items = []
-    ){}
-    public function add(int $nb, string $something){
-        $this->items[$nb] = $something;
+        public Product $item,
+        public int $quantity = 1
+    ) {}
+
+    public function setQuantity(int $q): void {
+        $this->quantity = max(1, $q);
     }
 
-    public function remove(int $nb, Item $item){
-        unset($this->items[$item]);
+    public function getTotal(): float {
+        return $this->item->getPrice() * $this->quantity;
     }
+}
 
-    public function update(int $nb, string $something){
-        $this->items[$nb] = $something;
-    }
+class Cart {
+    /** @var array<int, CartItem> */
+    private array $items = [];
 
-    public function getTotal(): int{
-        $total=0;
-        foreach($this->items as $key => $value){
-            $total+=$key->price*$value;
+     public function add(Product $product, int $quantity = 1): self
+    {
+        $id = $product->getId();
+
+        if (isset($this->items[$id])) {
+            $current = $this->items[$id]->getQuantity();
+            $this->items[$id]->setQuantity($current + $quantity);
+        } else {
+            $this->items[$id] = new CartItem($product, $quantity);
         }
+
+        return $this;
     }
 
-    public function count() : int{
-        return count($this->items);
+    public function remove(int $productId): self
+    {
+        unset($this->items[$productId]);
+        return $this;
     }
 
-    public function clear() : void{
+    public function update(int $itemId, int $quantity): void {
+        if (!isset($this->items[$itemId])) return;
+        $this->items[$itemId]->setQuantity($quantity);
+    }
+
+    public function getTotal(): float {
+        $total = 0.0;
+        foreach ($this->items as $cartItem) {
+            $total += $cartItem->getTotal();
+        }
+        return $total;
+    }
+
+    public function count(): int {
+        return count($this->items); // unique items
+    }
+
+    public function clear(): self
+    {
         $this->items = [];
+        return $this;
+    }
+
+    public function getItems(): array {
+        return $this->items;
+    }
+
+    public function getTotalAllItems(): int {
+        $total=0;
+        foreach ($this->items as $item){
+            $total += $item->quantity;
+        }
+        return $total;
     }
 }
-
-class Item{
-    public function __construct(
-        public int $nb,
-        public string $name,
-        public int $price
-    ){
-}
-
-$cart = new Cart();
-$cart->add(1,"95844");
-$cart->add(2,"aaa");
-$cart->add(3,"674687");
-$cart->add(4,"szfafvzqgf");
-
-$cart->update(4,"wwwwwwwwwwwwww");
-$cart->remove(2);
-$cart->getTotal();
-$cart->clear();

@@ -35,12 +35,3 @@ class Address{
     }
 }
 
-$add1= new Address("12 aav", "Bordeaux", 46988, "France");
-$add2= new Address("784 av", "Paris", 89954, "France");
-$add3 = new Address("83 imp", "Los angeles", 4444, "USA");
-
-$user1 = new User("Jean", "jean@exemple.com", time(), [$add1, $add2, $add3]);
-
-foreach  ($user1->getAddresses() as $address){
-    echo $address.'<br>';
-}

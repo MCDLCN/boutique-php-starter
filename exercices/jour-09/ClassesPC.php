@@ -3,6 +3,7 @@
 class Product
 {
     public function __construct(
+        private int $id,
         private string $name,
         private float $price,
         private int $stock,
@@ -139,15 +140,7 @@ class Category
 }
 
 
-$cat1 = new Category('BBBB');
-$cat2 = new Category('AAAA');
-$cat3 = new Category('CVFFFFFF');
 
-$product1 = new Product("something", 498, 9867486, $cat1);
-$product2 = new Product('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',156, 49, $cat2);
-$product3 = new Product('this is something',0, 4984, $cat3);
-$product4 = new Product('avfegf',10, 10, $cat1);
-$product5 = new Product('afeza',50, 999, $cat2);
 
 // $products=[$product1,$product2,$product3,$product4,$product5];
 // foreach ($products as $product){

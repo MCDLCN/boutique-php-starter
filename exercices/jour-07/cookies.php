@@ -26,9 +26,9 @@ setcookie(
  [
     'expires' => time() + 30 * 24 * 60 * 60,   
     'path' => '/',
-    'httponly' => true
+    'httponly' => true,
     'samesite' => 'Lax'
  ]
-)
+ );
 
 $cart = json_decode($_COOKIE['cart'] ?? '[]', true);
