@@ -106,4 +106,17 @@ class Product
         if ($qty < 1) return false;
         return ($currentInCart + $qty) <= $this->stock;
     }
+
+    public function __toString():string
+    {
+        return $this->name.' for '.$this->getFinalPrice();
+    }
+
+    public function setPrice(int $price): void  {
+        $this->price = $price;
+    }
+
+    public function setId(int $id): void {
+        $this->id = $id;
+    }
 }

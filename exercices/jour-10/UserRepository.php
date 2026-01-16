@@ -1,0 +1,171 @@
+<?php
+declare(strict_types=1);
+
+final class UserRepository
+{
+    public function __construct(
+        private PDO $pdo,
+        private AddressRepository $addressRepo
+    ) {}
+
+    public function find(int $id): ?User
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT id, name, email, password_hash, date_inscription
+             FROM users
+             WHERE id = ?"
+        );
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? $this->hydrate($row) : null;
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT id, name, email, password_hash, date_inscription
+             FROM users
+             WHERE email = ?"
+        );
+        $stmt->execute([$email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? $this->hydrate($row) : null;
+    }
+
+    public function findWithAddresses(int $id): ?User
+    {
+        $user = $this->find($id);
+        if (!$user) return null;
+
+        // Your User::addAddress currently expects an int key.
+        // Address entity (as you wrote it) doesn't include an id, so we use the row order as keys.
+        $addresses = $this->addressRepo->findByUserId($id);
+        foreach ($addresses as $idx => $address) {
+            $user->addAddress($idx, $address);
+        }
+
+        return $user;
+    }
+
+    /** @return User[] */
+    public function findAll(): array
+    {
+        $stmt = $this->pdo->query(
+            "SELECT id, name, email, password_hash, date_inscription
+             FROM users
+             ORDER BY id DESC"
+        );
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map([$this, 'hydrate'], $rows);
+    }
+
+    // CREATE (hash password)
+    // Throws RuntimeException if email already exists
+    public function save(User $user, string $plainPassword): void
+    {
+        $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
+        if ($hash === false) {
+            throw new RuntimeException("Failed to hash password");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare(
+                "INSERT INTO users (name, email, password_hash, date_inscription)
+                 VALUES (?, ?, ?, ?)"
+            );
+            $stmt->execute([
+                $user->getName(),
+                $user->getEmail(),
+                $hash,
+                $user->getDateInscription(), // or date('Y-m-d H:i:s')
+            ]);
+        } catch (PDOException $e) {
+            if (($e->errorInfo[1] ?? null) === 1062) {
+                throw new RuntimeException("Email already exists");
+            }
+            throw $e;
+        }
+
+        if (method_exists($user, 'setId')) {
+            $user->setId((int)$this->pdo->lastInsertId());
+        }
+    }
+
+    // UPDATE (profile fields)
+    public function update(User $user): void
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "UPDATE users SET name = ?, email = ? WHERE id = ?"
+            );
+            $stmt->execute([
+                $user->getName(),
+                $user->getEmail(),
+                $user->id,
+            ]);
+        } catch (PDOException $e) {
+            if (($e->errorInfo[1] ?? null) === 1062) {
+                throw new RuntimeException("Email already exists");
+            }
+            throw $e;
+        }
+    }
+
+    // UPDATE (password)
+    public function updatePassword(int $userId, string $plainPassword): void
+    {
+        $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
+        if ($hash === false) {
+            throw new RuntimeException("Failed to hash password");
+        }
+
+        $stmt = $this->pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $stmt->execute([$hash, $userId]);
+    }
+
+    // AUTH helper
+    public function verifyCredentials(string $email, string $plainPassword): ?User
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT id, name, email, password_hash, date_inscription
+             FROM users
+             WHERE email = ?"
+        );
+        $stmt->execute([$email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) return null;
+
+        if (!password_verify($plainPassword, (string)$row['password_hash'])) {
+            return null;
+        }
+
+        return $this->hydrate($row);
+    }
+
+    public function delete(int $id): void
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+    }
+
+    public function existsEmail(string $email): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT 1 FROM users WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        return $stmt->fetchColumn() !== false;
+    }
+
+    private function hydrate(array $row): User
+    {
+        return new User(
+            (int)$row['id'],
+            (string)$row['name'],
+            (string)$row['email'],
+            (string)$row['date_inscription'],
+            []
+        );
+    }
+}

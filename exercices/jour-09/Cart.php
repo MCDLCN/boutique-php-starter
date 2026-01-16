@@ -18,7 +18,8 @@ class CartItem {
 class Cart {
     /** @var array<int, CartItem> */
     private array $items = [];
-
+    public function __construct()
+    {}
      public function add(Product $product, int $quantity = 1): self
     {
         $id = $product->getId();
