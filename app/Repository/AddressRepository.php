@@ -19,7 +19,7 @@ final class AddressRepository
     }
 
     /** @return Address[] */
-    public function findByUserId(User $user): array
+    public function findByUserId(int $id): array
     {
         $stmt = $this->pdo->prepare(
             "SELECT id, user_id, road, city, postal_code, country, is_default
@@ -27,7 +27,7 @@ final class AddressRepository
              WHERE user_id = ?
              ORDER BY is_default DESC, id ASC"
         );
-        $stmt->execute([$user->getId()]);
+        $stmt->execute([$id]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map([$this, 'hydrate'], $rows);
@@ -127,7 +127,7 @@ final class AddressRepository
             (int) $row["user_id"],
             (string)$row['road'],
             (string)$row['city'],
-            (int)$row['postal_code'],
+            (string)$row['postal_code'],
             (string)$row['country'],
             (bool) $row['is_default']
         );

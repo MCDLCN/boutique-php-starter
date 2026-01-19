@@ -127,12 +127,12 @@ class ProductRepository
     }
 }
 
-$pdo = new PDO('mysql:host=localhost;dbname=shop;charset=utf8mb4','dev', 'dev');
+// $pdo = new PDO('mysql:host=localhost;dbname=shop;charset=utf8mb4','dev', 'dev');
 
-$productRepo = new ProductRepository($pdo);
+// $productRepo = new ProductRepository($pdo);
 
-$product1 = $productRepo->find(1);
-$products = $productRepo->findAll();
+// $product1 = $productRepo->find(1);
+// $products = $productRepo->findAll();
 
 // //Classic search and fetchAll
 // echo $product1;

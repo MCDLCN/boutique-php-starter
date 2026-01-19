@@ -48,7 +48,7 @@ class Cart
     }
 
     public function getCartItem(int $id): ?CartItem{
-        return $this->items[$id];
+        return $this->items[$id] ?? null;
     }
 
     public function isEmpty(): bool{

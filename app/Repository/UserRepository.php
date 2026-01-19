@@ -21,20 +21,20 @@ final class UserRepository
         return $row ? $this->hydrate($row) : null;
     }
 
-    public function findByEmail(User $user): ?User
+    public function findByEmail(string $email): ?User
     {
         $stmt = $this->pdo->prepare(
             "SELECT id, name, email, password_hash, date_inscription
              FROM users
              WHERE email = ?"
         );
-        $stmt->execute([$$user->getEmail()]);
+        $stmt->execute([$email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $row ? $this->hydrate($row) : null;
     }
 
-    public function findWithAddresses(User $user): ?User
+    public function findWithAddresses(?User $user): ?User
     {
         if (!$user) return null;
 
@@ -145,7 +145,7 @@ final class UserRepository
     public function delete(User $user): void
     {
         $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = ?");
-        $stmt->execute([$$user->getId()]);
+        $stmt->execute([$user->getId()]);
     }
 
     public function existsEmail(string $email): bool

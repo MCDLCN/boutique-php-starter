@@ -2,7 +2,7 @@
 class User{
 
     public function __construct(
-        public int $id,
+        private ?int $id,
         private string $name,
         private string $email,
         private string $dateInscription,
@@ -17,7 +17,12 @@ class User{
         }
 
         public function getDefaultAddress(): ?Address{
-            return $this->Addresses[0] ?? null;
+            foreach($this->Addresses as $address){
+                if($address->isDefault()){
+                    return $address;
+                }
+            }
+            return null;
         }
 
         public function getName(): string{
@@ -40,4 +45,11 @@ class User{
             $this->Addresses = [];
         }
 
+        public function setId(int $id): void{
+            $this->id = $id;
+        }
+
+        public function getId(): int{
+            return $this->id;
+        }
 }

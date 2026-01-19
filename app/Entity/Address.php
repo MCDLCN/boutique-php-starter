@@ -2,11 +2,15 @@
 class Address{
 
     public function __construct(
-        private int $id,
+        private ?int $id,
+        private int $userId,
         private string $road,
         private string $city,
-        private int $postalCode,
-        private string $country){}
+        private string $postalCode,
+        private string $country,
+        private bool $isDefault
+        ){}
+        
 
     public function __toString(): string
     {
@@ -22,7 +26,7 @@ class Address{
         return $this->city;
     }
 
-    public function getPostalCode(): int{
+    public function getPostalCode(): string{
         return $this->postalCode;
     }
     public function getCountry(): string{
@@ -31,5 +35,13 @@ class Address{
 
     public function getId(): int{
         return $this->id;
+    }
+
+    public function getUserId(): int{
+        return $this->userId;
+    }
+
+    public function isDefault(): bool{
+        return $this->isDefault;
     }
 }

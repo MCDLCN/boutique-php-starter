@@ -3,11 +3,20 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/helpers.php';
-$files = glob(__DIR__ . '/../app/entities/*.php');
+$files = glob(__DIR__ . '/../app/Entity/*.php');
 
 foreach ($files as $file) {
     require_once($file);   
 }
+
+// Repositories
+$repoFiles = glob(__DIR__ . '/../app/Repository/*.php');
+foreach ($repoFiles as $file) {
+    require_once($file);
+}
+
+require_once __DIR__ .'/../config/Database.php';
+
 
 session_start();
 
@@ -19,54 +28,19 @@ function getCart(): Cart {
 }
 $cart = getCart();
 
-try {
-    $pdo = new PDO(
-        "mysql:host=localhost;dbname=shop;charset=utf8mb4",
-        "dev",
-        "dev",
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
-} catch (PDOException $e) {
-    die("DB error");
-}
+$pdo = Database::getInstance();
 
-if (!isset($_SESSION['cart'])) {
-    $_SESSION['cart'] = [];
-}
-
-
-/** @var array<string,Category> $categoryPool */
-$categoryPool = [];
+$categoryRepo = new CategoryRepository($pdo);
+$productRepo  = new ProductRepository($pdo, $categoryRepo);
 
 
 $action = $_POST['action'] ?? '';
-
-function fetchProduct(PDO $pdo, int $id): ?Product {
-    $stmt = $pdo->prepare("SELECT id, name, description, price, stock, category, discount, image, dateAdded FROM products WHERE id = ?");
-    $stmt->execute([$id]);
-    $r = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$r) return null;
-    
-    $category = Category::fromName($r["category"]);
-
-    return new Product(
-        (int)$r['id'],
-        (string)$r['name'],
-        (string)($r['description'] ?? ''),
-        (float)$r['price'],
-        (int)$r['stock'],
-        $category,
-        (int)($r['discount'] ?? 0),
-        (string)($r['image'] ?? ''),
-        (string)($r['dateAdded'] ?? '')
-    );
-}
 
 if ($action === 'add') {
     $id = (int)($_POST['idCart'] ?? 0);
     $qty = max(1, (int)($_POST['quantityAdd'] ?? 1));
 
-    $product = $id > 0 ? fetchProduct($pdo, $id) : null;
+    $product = $id > 0 ? $productRepo->find($id) : null;
     if (!$product) {
         $_SESSION['flash'] = 'Product not found';
         header('Location: catalog.php'); exit;
@@ -95,7 +69,7 @@ if ($action === 'update') {
     $cart = getCart();
     if ($id <= 0) { header('Location: cart.php'); exit; }
 
-    $product = fetchProduct($pdo, $id);
+    $product = $productRepo->find($id);
     if (!$product) {
         $cart->removeProduct($id);
         $_SESSION['flash'] = "Product removed (Doesn't exist)";
@@ -133,38 +107,15 @@ if ($action === 'emptyCart') {
 
 $cart = getCart();
 
-if (!$cart->isEmpty()) {
-    $ids = array_keys($cart->getItems());
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-
-    $stmt = $pdo->prepare("SELECT id, name, description, price, stock, category, discount, image, dateAdded
-                           FROM products WHERE id IN ($placeholders)");
-    $stmt->execute($ids);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $byId = [];
-    foreach ($rows as $r) $byId[(int)$r['id']] = $r;
-
-    foreach ($ids as $id) {
-        if (!isset($byId[$id])) {
-            $cart->removeProduct($id);
-            continue;
-        }
-
-        $r = $byId[$id];
-        $category = Category::fromName($r["category"]);
-        $cart->setProduct(new Product(
-            (int)$r['id'],
-            (string)$r['name'],
-            (string)($r['description'] ?? ''),
-            (float)$r['price'],
-            (int)$r['stock'],
-            $category,
-            (int)($r['discount'] ?? 0),
-            (string)($r['image'] ?? ''),
-            (string)($r['dateAdded'] ?? '')
-        ));
+// Refresh products in cart from DB (price/stock/discount changes),
+// and remove items that no longer exist.
+foreach (array_keys($cart->getItems()) as $id) {
+    $product = $productRepo->find((int)$id);
+    if ($product === null) {
+        $cart->removeProduct((int)$id);
+        continue;
     }
+    $cart->setProduct($product);
 }
 
 $totalCart = $cart->getTotal();

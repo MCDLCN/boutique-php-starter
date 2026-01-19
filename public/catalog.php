@@ -3,13 +3,23 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/helpers.php';
-$files = glob(__DIR__ . '/../app/entities/*.php');
+$files = glob(__DIR__ . '/../app/Entity/*.php');
 
 foreach ($files as $file) {
     require_once($file);   
 }
 
+// Repositories
+$repoFiles = glob(__DIR__ . '/../app/Repository/*.php');
+foreach ($repoFiles as $file) {
+    require_once($file);
+}
+
+require_once __DIR__ .'/../config/Database.php';
+
+
 session_start();
+
 function getCart(): Cart {
     if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
         $_SESSION['cart'] = new Cart();
@@ -18,92 +28,88 @@ function getCart(): Cart {
 }
 $cart = getCart();
 
-try {
-    $pdo = new PDO(
-        "mysql:host=localhost;dbname=shop;charset=utf8mb4",
-        "dev",
-        "dev",
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
-} catch (PDOException $e) {
-    die("DB error");
-}
-
-
 // Flash message (from cart actions)
 if (isset($_SESSION['flash'])) {
     echo '<script>alert("' . e((string)$_SESSION['flash']) . '")</script>';
     unset($_SESSION['flash']);
 }
 
-// Fetch products and hydrate objects
-$stmt = $pdo->prepare("SELECT id, name, description, price, stock, category, discount, image, dateAdded FROM products");
-$stmt->execute();
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// --- Repos
+$pdo = Database::getInstance();
+$categoryRepo = new CategoryRepository($pdo);
+$productRepo = new ProductRepository($pdo, $categoryRepo);
 
-/** @var Product[] $products */
+// --- Data
+$products = $productRepo->findAll();
 
-$categoryPool = [];
-$products = [];
-foreach ($rows as $r) {
-    $catName = (string)($r['category'] ?? ''); 
-    if (!isset($categoryPool[$catName])) {
-        $categoryPool[$catName] = new Category($catName);
-    }
-
-    $category = $categoryPool[$catName];
-    $category->increaseCount();
-
-    $products[] = new Product(
-        (int)$r['id'],
-        (string)$r['name'],
-        (string)($r['description'] ?? ''),
-        (float)$r['price'],
-        (int)$r['stock'],
-        $category,
-        (int)($r['discount'] ?? 0),
-        (string)($r['image'] ?? ''),
-        (string)($r['dateAdded'] ?? '')
-    );
+// Category counts for sidebar
+$categoryCounts = [];
+foreach ($products as $p) {
+    $name = $p->getCategory()->getName();
+    $categoryCounts[$name] = ($categoryCounts[$name] ?? 0) + 1;
 }
 
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$perPage = isset($_GET['perPage']) ? (int)$_GET['perPage'] : 12;
 
-// Counters + category counts
+$allowedPerPage = [10, 15, 20, 25];
+if (!in_array($perPage, $allowedPerPage, true)) {
+    $perPage = 10;
+}
+
+$filters = [
+    'nameSearch' => (string)($_GET['nameSearch'] ?? ''),
+    'categories' => $_GET['categories'] ?? [],
+    'priceMin'   => (string)($_GET['price_min'] ?? ''),
+    'priceMax'   => (string)($_GET['price_max'] ?? ''),
+    'inStock'    => isset($_GET['in_stock']),
+    'sort'       => (string)($_GET['sort'] ?? 'az'),
+];
+
+$products = $productRepo->findPaginatedFiltered($page, $perPage, $filters);
+$pagination = $productRepo->getPaginationDataFiltered($page, $perPage, $filters);
+
+function pageUrl(int $page): string{
+    $params = $_GET;
+    $params['page'] = $page;
+    return 'catalog.php?'.http_build_query($params);
+}
+
+// Counters
 $inStock = 0;
 $onSale = 0;
 $outOfStock = 0;
 
 foreach ($products as $p) {
     $p->isInStock() ? $inStock++ : $outOfStock++;
-    if ($p->isOnSale()) $onSale++;
+    if ($p->isOnSale()) {
+        $onSale++;
+    }
 }
 
-//$categoriesSide = array_values(array_unique(array_map(fn(Product $p) => $p->getCategory()-, $products)));
+// // Filters (GET)
+// $selectedCategories = $_GET['categories'] ?? [];
+// $nameSearch = (string)($_GET['nameSearch'] ?? '');
+// $maxPrice = (string)($_GET['price_max'] ?? '');
+// $minPrice = (string)($_GET['price_min'] ?? '');
+// $inStockOnly = isset($_GET['in_stock']);
+// $sort = (string)($_GET['sort'] ?? 'az');
 
-// Filters (GET)
-$selectedCategories = $_GET['categories'] ?? [];
-$nameSearch = (string)($_GET['nameSearch'] ?? '');
-$maxPrice = (string)($_GET['price_max'] ?? '');
-$minPrice = (string)($_GET['price_min'] ?? '');
-$inStockOnly = isset($_GET['in_stock']);
+// Filter products
+// $filtered = [];
 
+// foreach ($products as $p) {
+//     if ($nameSearch !== '' && stripos($p->getName(), $nameSearch) === false) continue;
+//     if ($inStockOnly && !$p->isInStock()) continue;
+//     if (!empty($selectedCategories) && !in_array($p->getCategory()->getName(), $selectedCategories, true)) continue;
+//     if ($maxPrice !== '' && $p->getFinalPrice() > (float)$maxPrice) continue;
+//     if ($minPrice !== '' && $p->getFinalPrice() < (float)$minPrice) continue;
 
+//     $filtered[] = $p;
+// }
 
-$filtered = [];
-
-foreach ($products as $p) {
-    if ($nameSearch !== '' && stripos($p->getName(), $nameSearch) === false) continue;
-    if ($inStockOnly && !$p->isInStock()) continue;
-    if (!empty($selectedCategories) && !in_array($p->getCategory()->getName(), $selectedCategories, true)) continue;
-    if ($maxPrice !== '' && $p->getFinalPrice() > (float)$maxPrice) continue;
-    if ($minPrice !== '' && $p->getFinalPrice() < (float)$minPrice) continue;
-
-    $filtered[] = $p;
-}
-
-$sort = $_GET['sort'] ?? '';
-
-usort($filtered, function (Product $a, Product $b) use ($sort) {
+// Sort
+usort($products, function (Product $a, Product $b) use ($sort) {
     return match ($sort) {
         'az'         => strcasecmp($a->getName(), $b->getName()),
         'za'         => strcasecmp($b->getName(), $a->getName()),
@@ -112,7 +118,10 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
         default      => 0,
     };
 });
-                        
+
+
+
+$categories = $categoryRepo->findAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -133,7 +142,7 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
             <a href="contact.html" class="header__nav-link">Contact</a>
         </nav>
         <div class="header__actions">
-            <a href="cart.php" class="header__cart">🛒<span class="header__cart-badge"><?= (int)(getCart()->countUnique() ?? 0) ?></span></a>
+            <a href="cart.php" class="header__cart">🛒<span class="header__cart-badge"><?= (int)getCart()->countUnique() ?></span></a>
             <a href="connexion.html" class="btn btn--primary btn--sm">Log in</a>
         </div>
         <button class="header__menu-toggle">☰</button>
@@ -145,12 +154,16 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
         <div class="page-header">
             <h1 class="page-title">Our Catalog</h1>
             <p class="page-subtitle">Discover all out products</p>
-            <p><strong><?= $inStock ?></strong> in stock · <strong><?= $outOfStock ?></strong> out of stock · <strong><?= $onSale ?></strong> on sale</p>
+            <p><strong><?= (int)$inStock ?></strong> in stock · <strong><?= (int)$outOfStock ?></strong> out of stock · <strong><?= (int)$onSale ?></strong> on sale</p>
         </div>
 
         <div class="catalog-layout">
             <aside class="catalog-sidebar">
+
+                <!-- FILTER FORM -->
                 <form method="GET" action="catalog.php">
+                    <input type="hidden" name="sort" value="<?= e($sort) ?>">
+
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Search</h3>
                         <input type="text" name="nameSearch" class="form-input" placeholder="Search..." value="<?= e($nameSearch) ?>">
@@ -159,10 +172,19 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Categories</h3>
                         <div class="catalog-sidebar__categories">
-                            <?php foreach ($categoryPool as $cat): ?>
+                            <?php foreach ($categories as $cat): ?>
+                                <?php $catName = $cat->getName(); ?>
                                 <label class="form-checkbox">
-                                    <input type="checkbox" name="categories[]" value="<?= $cat->getName() ?>" <?= in_array($cat->getName(), $selectedCategories, true) ? 'checked' : '' ?>>
-                                    <span><?= e($cat->getName()) ?> (<?= (int)$cat->getCount() ?>)</span>
+                                    <input
+                                        type="checkbox"
+                                        name="categories[]"
+                                        value="<?= e($catName) ?>"
+                                        <?= in_array($catName, $selectedCategories, true) ? 'checked' : '' ?>
+                                    >
+                                    <span>
+                                        <?= e($catName) ?>
+                                        (<?= (int)($categoryCounts[$catName] ?? 0) ?>)
+                                    </span>
                                 </label>
                             <?php endforeach; ?>
                         </div>
@@ -192,21 +214,58 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
 
                     <button type="submit" class="btn btn--primary btn--block">Apply</button>
                     <a href="catalog.php" class="btn btn--secondary btn--block mt-sm">Reset</a>
-                
+                </form>
+
             </aside>
 
             <div class="catalog-main">
                 <div class="catalog-header">
                     <p><strong><?= (int)count($filtered) ?></strong> products found</p>
+
+                    <!-- SORT FORM (keeps existing filters) -->
                     <div class="catalog-header__sort">
-                        <label>Sort:</label>
-                        <select name="sort" onchange="this.form.submit()">
-                            <option value="az" <?= ($_GET['sort'] ?? '') === 'az' ? 'selected' : '' ?>>A → Z</option>
-                            <option value="za" <?= ($_GET['sort'] ?? '') === 'za' ? 'selected' : '' ?>>Z → A</option>
-                            <option value="price_asc" <?= ($_GET['sort'] ?? '') === 'price_asc' ? 'selected' : '' ?>>Price ↑</option>
-                            <option value="price_desc" <?= ($_GET['sort'] ?? '') === 'price_desc' ? 'selected' : '' ?>>Price ↓</option>
-                        </select>
+                        <form method="GET" action="catalog.php">
+                            <?php foreach ((array)$selectedCategories as $c): ?>
+                                <input type="hidden" name="categories[]" value="<?= e((string)$c) ?>">
+                            <?php endforeach; ?>
+                            <input type="hidden" name="nameSearch" value="<?= e($nameSearch) ?>">
+                            <input type="hidden" name="price_min" value="<?= e($minPrice) ?>">
+                            <input type="hidden" name="price_max" value="<?= e($maxPrice) ?>">
+                            <?php if ($inStockOnly): ?>
+                                <input type="hidden" name="in_stock" value="1">
+                            <?php endif; ?>
+
+                            <label>Sort:</label>
+                            <select name="sort" onchange="this.form.submit()">
+                                <option value="az" <?= $sort === 'az' ? 'selected' : '' ?>>A → Z</option>
+                                <option value="za" <?= $sort === 'za' ? 'selected' : '' ?>>Z → A</option>
+                                <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price ↑</option>
+                                <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price ↓</option>
+                            </select>
                         </form>
+                        <form method="GET" action="catalog.php">
+                        <?php
+                        // Preserve existing filters
+                        foreach ((array)($_GET['categories'] ?? []) as $c) {
+                            echo '<input type="hidden" name="categories[]" value="' . e((string)$c) . '">';
+                        }
+                        ?>
+                        <input type="hidden" name="nameSearch" value="<?= e((string)($_GET['nameSearch'] ?? '')) ?>">
+                        <input type="hidden" name="price_min" value="<?= e((string)($_GET['price_min'] ?? '')) ?>">
+                        <input type="hidden" name="price_max" value="<?= e((string)($_GET['price_max'] ?? '')) ?>">
+                        <?php if (isset($_GET['in_stock'])): ?>
+                            <input type="hidden" name="in_stock" value="1">
+                        <?php endif; ?>
+                        <input type="hidden" name="sort" value="<?= e((string)($_GET['sort'] ?? 'az')) ?>">
+                        <input type="hidden" name="page" value="1"><!-- reset page when perPage changes -->
+
+                        <label>Per page:</label>
+                        <select name="perPage" onchange="this.form.submit()">
+                            <?php foreach ([6, 12, 24, 48] as $n): ?>
+                                <option value="<?= $n ?>" <?= $perPage === $n ? 'selected' : '' ?>><?= $n ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
                     </div>
                 </div>
 
@@ -279,19 +338,27 @@ usort($filtered, function (Product $a, Product $b) use ($sort) {
                     <?php endforeach; ?>
                 </div>
 
-                <script>
-                    (function(){
-                        const el = document.querySelector('.catalog-header p strong');
-                        if (el) el.textContent = "<?= (int)$countTotal ?>";
-                    })();
-                </script>
-
                 <nav class="pagination">
-                    <a class="pagination__item pagination__item--disabled">←</a>
-                    <a class="pagination__item pagination__item--active">1</a>
-                    <a class="pagination__item">2</a>
-                    <a class="pagination__item">3</a>
-                    <a class="pagination__item">→</a>
+                    <?php if ($pagination['hasPrevious']): ?>
+                        <a class="pagination__item" href="<?= e(pageUrl($pagination['currentPage'] - 1)) ?>">←</a>
+                    <?php else: ?>
+                        <span class="pagination__item pagination__item--disabled">←</span>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $pagination['totalPages']; $i++): ?>
+                        <a
+                            class="pagination__item <?= $i === $pagination['currentPage'] ? 'pagination__item--active' : '' ?>"
+                            href="<?= e(pageUrl($i)) ?>"
+                        >
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+
+                    <?php if ($pagination['hasNext']): ?>
+                        <a class="pagination__item" href="<?= e(pageUrl($pagination['currentPage'] + 1)) ?>">→</a>
+                    <?php else: ?>
+                        <span class="pagination__item pagination__item--disabled">→</span>
+                    <?php endif; ?>
                 </nav>
             </div>
         </div>
