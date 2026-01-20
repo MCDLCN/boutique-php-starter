@@ -55,15 +55,15 @@ function isOnSale(int $discount) : bool {
 	return $discount>0;
 }
 
-function displayAllBadges(array $product) : string {
-	$badges= '';
-	if (isNew($product["dateAdded"])){
-       $badges=$badges.'<span class="badge badge-pill bg-primary"> New </span>';}
-    if (isOnSale($product["discount"])){
-      	$badges=$badges.'<span class="badge badge-pill bg-primary"> On sale! </span>';}
-    $badges= $badges.displayBadge(" ",displayStock($product['stock']));
-    return $badges;
-}
+// function displayAllBadges(array $product) : string {
+// 	$badges= '';
+// 	if (isNew($product["dateAdded"])){
+//        $badges=$badges.'<span class="badge badge-pill bg-primary"> New </span>';}
+//     if (isOnSale($product["discount"])){
+//       	$badges=$badges.'<span class="badge badge-pill bg-primary"> On sale! </span>';}
+//     $badges= $badges.displayBadge(" ",displayStock((int)$product['stock']));
+//     return $badges;
+// }
 
 function validateEmail(string $email) : bool {
 	return filter_var($email, FILTER_VALIDATE_EMAIL);
@@ -86,6 +86,80 @@ function dump_and_die(mixed ...$vars): void {
     die();
 }
 
+function view(string $template, array $data = []): void
+{
+    extract($data); // Transforme ['title' => 'X'] en $title = 'X'
+    
+    ob_start();
+    require __DIR__ . "/../views/$template.php";
+    $content = ob_get_clean();
+    
+    require __DIR__ . '/../views/layout.php';
+}
+
+// Helper de redirection
+function redirect(string $url): void
+{
+    header("Location: $url");
+    exit;
+}
+
+function session(string $key, mixed $default = null): mixed
+{
+    return $_SESSION[$key] ?? $default;
+}
+
+// Écrire une valeur en session
+function setSession(string $key, mixed $value): void
+{
+    $_SESSION[$key] = $value;
+}
+
+// Créer un flash message
+function flash(string $type, string $message): void
+{
+    $_SESSION['flash'] = [
+        'type' => $type,      // 'success', 'error', 'warning'
+        'message' => $message
+    ];
+}
+
+// Récupérer et supprimer le flash message
+function getFlash(): ?array
+{
+    $flash = $_SESSION['flash'] ?? null;
+    unset($_SESSION['flash']); // Supprime après lecture
+    return $flash;
+}
+
+// Récupérer l'ancienne valeur d'un champ
+function old(string $key, string $default = ''): string
+{
+    return $_SESSION['old'][$key] ?? $default;
+}
+
+
 function e($string) {
     return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}
+
+function pageUrl(int $page): string {
+    $params = $_GET;
+    $params['page'] = $page;
+
+    $basePath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // e.g. /catalog
+    return $basePath . '?' . http_build_query($params);
+}
+
+function getCart(): \App\Entity\Cart
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+
+    if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof \App\Entity\Cart)) {
+        $_SESSION['cart'] = new \App\Entity\Cart();
+    }
+
+    return $_SESSION['cart'];
 }

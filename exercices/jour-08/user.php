@@ -17,7 +17,7 @@ class User
 
 $user = new User('John', 'johndoe@me.com', time() - 100);
 $user2 = new User('Jane', 'janedoe@me.com', time() - 1000);
-$user3 = new User('Joe', 'joe@me.com', time() - 1000000000000000000000000000);
+$user3 = new User('Joe', 'joe@me.com', time() - 1000000000000000000);
 $users = [$user, $user2, $user3];
 
 foreach($users as $user){

@@ -13,21 +13,28 @@ class Router
 
     public function post(string $path, array $action): void
     {
-        $this->routes['POST'][$path] = $action;
+        $regex = preg_replace('/{(\w+)}/', '(?P<$1>[^/]+)', $path);
+        $regex = '#^' . $regex . '$#';
+        $this->routes['POST'][$regex] = $action;
     }
 
     public function dispatch(string $uri, string $method): void
     {
         $path = parse_url($uri, PHP_URL_PATH);
+        $found = false;
         // Dans dispatch() - avec preg_match
         foreach ($this->routes[$method] ?? [] as $regex => [$controller, $action]) {
             if (preg_match($regex, $path, $matches)) {
                 $params = array_filter($matches, fn($key)=>!is_int($key), ARRAY_FILTER_USE_KEY);
                 $controllerInstance = new $controller();
                 $controllerInstance->$action($params);
-            }
+                $found = true;
+            } 
+
         }
-        http_response_code(404);
-        echo 'Page not found';
+        if (!$found) {
+            http_response_code(404);
+            echo 'Page not found';
+        }
     }
 }

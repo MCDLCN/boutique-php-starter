@@ -62,11 +62,11 @@ $filters = [
 $products = $productRepo->findPaginatedFiltered($page, $perPage, $filters);
 $pagination = $productRepo->getPaginationDataFiltered($page, $perPage, $filters);
 
-function pageUrl(int $page): string{
-    $params = $_GET;
-    $params['page'] = $page;
-    return 'catalog.php?'.http_build_query($params);
-}
+// function pageUrl(int $page): string{
+//     $params = $_GET;
+//     $params['page'] = $page;
+//     return 'catalog.php?'.http_build_query($params);
+// }
 
 // Counters
 $inStock = 0;

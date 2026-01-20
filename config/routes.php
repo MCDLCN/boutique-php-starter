@@ -1,23 +1,27 @@
 <?php
 // config/routes.php
-require_once __DIR__ . '/../../vendor/autoload.php';
+//require_once __DIR__ . '/../vendor/autoload.php';
 use App\Router;
 use App\Controller\HomeController;
+use App\Controller\CartController;
+use App\Controller\ProductController;
+
 $router = new Router();
 
-// Pages publiques
+// Public pages
 $router->get('/', [HomeController::class, 'index']);
-$router->get('/produits', [ProductController::class, 'index']);
-$router->get('/produit', [ProductController::class, 'show']);
+$router->get('/catalog', [ProductController::class, 'index']);
+$router->get('/product/{id}', [ProductController::class, 'show']);
 
 // Panier
-$router->get('/panier', [CartController::class, 'index']);
-$router->post('/panier/ajouter', [CartController::class, 'add']);
-$router->post('/panier/supprimer', [CartController::class, 'remove']);
-
+$router->get('/cart', [CartController::class, 'index']);
+$router->post('/cart/add', [CartController::class, 'add']);
+$router->post('/cart/remove', [CartController::class, 'remove']);
+$router->post('/cart/update', [CartController::class, 'update']);
+$router->post('/cart/empty', [CartController::class,'empty']);
 // Contact
-$router->get('/contact', [ContactController::class, 'index']);
-$router->post('/contact', [ContactController::class, 'send']);
+// $router->get('/contact', [ContactController::class, 'index']);
+// $router->post('/contact', [ContactController::class, 'send']);
 
 return $router;
 
