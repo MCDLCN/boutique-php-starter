@@ -1,21 +1,15 @@
 <?php
 // public/cart.php
 declare(strict_types=1);
+require_once __DIR__ . '/../vendor/autoload.php';
+use App\Repository\ProductRepository;
+use App\Repository\CategoryRepository;
+use App\Repository\AddressRepository;
+use App\Repository\UserRepository;
+use App\Database;
+use App\Entity\Cart;
 
-require_once __DIR__ . '/../app/helpers.php';
-$files = glob(__DIR__ . '/../app/Entity/*.php');
 
-foreach ($files as $file) {
-    require_once($file);   
-}
-
-// Repositories
-$repoFiles = glob(__DIR__ . '/../app/Repository/*.php');
-foreach ($repoFiles as $file) {
-    require_once($file);
-}
-
-require_once __DIR__ .'/../config/Database.php';
 
 
 session_start();

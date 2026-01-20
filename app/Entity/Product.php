@@ -1,4 +1,6 @@
 <?php
+namespace App\Entity;
+use InvalidArgumentException;
 
 class Product
 {

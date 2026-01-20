@@ -2,8 +2,12 @@
     "name": "user/boutique",
     "autoload": {
         "psr-4": {
-            "User\\Boutique\\": "src/"
-        }
-    },
-    "require": {}
+            "App\\": "app/"
+        },
+
+    "files": [
+         "app/helpers.php",
+         "config/constants.php"
+        ]
+    }
 }

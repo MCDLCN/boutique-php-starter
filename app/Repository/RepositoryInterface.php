@@ -1,4 +1,5 @@
 <?php
+namespace App\Repository;
 interface RepositoryInterface {
     public function find(int $id): ?object;
     public function findAll(): array;

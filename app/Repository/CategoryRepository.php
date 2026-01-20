@@ -1,4 +1,9 @@
 <?php
+namespace App\Repository;
+
+use App\Entity\Category;
+use App\Entity\Product;
+use PDO;
 require_once __DIR__ ."/RepositoryInterface.php";
 class CategoryRepository implements RepositoryInterface
 {

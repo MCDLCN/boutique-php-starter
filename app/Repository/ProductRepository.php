@@ -1,5 +1,11 @@
 <?php
-require_once __DIR__ ."/RepositoryInterface.php";
+namespace App\Repository;
+
+use PDO;
+use App\Entity\Product;
+use App\Entity\Category;
+
+use App\Repository\RepositoryInterface;
 class ProductRepository implements RepositoryInterface 
 {
     public function __construct(

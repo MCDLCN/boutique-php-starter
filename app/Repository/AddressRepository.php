@@ -1,5 +1,11 @@
 <?php
 declare(strict_types=1);
+namespace App\Repository;
+
+use App\Entity\Address;
+use App\Entity\User;
+use PDO;
+use Throwable;
 
 final class AddressRepository
 {

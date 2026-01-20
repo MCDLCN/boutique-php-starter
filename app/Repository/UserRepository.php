@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+namespace App\Repository;
+use App\Entity\User;
+use PDO;
+use RuntimeException;
+use PDOException;
+
 final class UserRepository
 {
     public function __construct(
@@ -38,7 +44,7 @@ final class UserRepository
     {
         if (!$user) return null;
 
-        $addresses = $this->addressRepo->findByUserId($user);
+        $addresses = $this->addressRepo->findByUserId($user->getId());
         foreach ($addresses as $address) {
             $user->addAddress( $address);
         }

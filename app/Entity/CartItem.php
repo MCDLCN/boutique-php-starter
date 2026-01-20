@@ -1,4 +1,5 @@
 <?php
+namespace App\Entity;
 class CartItem
 {
     public function __construct(

@@ -1,21 +1,14 @@
 <?php
 // public/catalog.php
 declare(strict_types=1);
-
-require_once __DIR__ . '/../app/helpers.php';
-$files = glob(__DIR__ . '/../app/Entity/*.php');
-
-foreach ($files as $file) {
-    require_once($file);   
-}
-
-// Repositories
-$repoFiles = glob(__DIR__ . '/../app/Repository/*.php');
-foreach ($repoFiles as $file) {
-    require_once($file);
-}
-
-require_once __DIR__ .'/../config/Database.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+use App\Repository\ProductRepository;
+use App\Repository\CategoryRepository;
+use App\Repository\AddressRepository;
+use App\Repository\UserRepository;
+use App\Entity\Product;
+use App\Database;
+use App\Entity\Cart;
 
 
 session_start();
@@ -50,7 +43,7 @@ foreach ($products as $p) {
 }
 
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$perPage = isset($_GET['perPage']) ? (int)$_GET['perPage'] : 12;
+$perPage = isset($_GET['perPage']) ? (int)$_GET['perPage'] : 5;
 
 $allowedPerPage = [10, 15, 20, 25];
 if (!in_array($perPage, $allowedPerPage, true)) {
@@ -92,8 +85,8 @@ foreach ($products as $p) {
 // $nameSearch = (string)($_GET['nameSearch'] ?? '');
 // $maxPrice = (string)($_GET['price_max'] ?? '');
 // $minPrice = (string)($_GET['price_min'] ?? '');
-// $inStockOnly = isset($_GET['in_stock']);
-// $sort = (string)($_GET['sort'] ?? 'az');
+//$inStockOnly = isset($_GET['in_stock']);
+$sort = (string)($_GET['sort'] ?? 'az');
 
 // Filter products
 // $filtered = [];
@@ -166,7 +159,7 @@ $categories = $categoryRepo->findAll();
 
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Search</h3>
-                        <input type="text" name="nameSearch" class="form-input" placeholder="Search..." value="<?= e($nameSearch) ?>">
+                        <input type="text" name="nameSearch" class="form-input" placeholder="Search..." value="<?= e($filters['nameSearch']) ?>">
                     </div>
 
                     <div class="catalog-sidebar__section">
@@ -179,7 +172,7 @@ $categories = $categoryRepo->findAll();
                                         type="checkbox"
                                         name="categories[]"
                                         value="<?= e($catName) ?>"
-                                        <?= in_array($catName, $selectedCategories, true) ? 'checked' : '' ?>
+                                        <?= in_array($catName, $filters['categories'], true) ? 'checked' : '' ?>
                                     >
                                     <span>
                                         <?= e($catName) ?>
@@ -195,11 +188,11 @@ $categories = $categoryRepo->findAll();
                         <div class="catalog-sidebar__price-inputs">
                             <div class="form-group">
                                 <label class="form-label">Min</label>
-                                <input type="number" name="price_min" class="form-input" placeholder="0$" min="0" step="0.01" value="<?= e($minPrice) ?>">
+                                <input type="number" name="price_min" class="form-input" placeholder="0$" min="0" step="0.01" value="<?= e($filters['priceMin']) ?>">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Max</label>
-                                <input type="number" name="price_max" class="form-input" placeholder="100$" min="0" step="0.01" value="<?= e($maxPrice) ?>">
+                                <input type="number" name="price_max" class="form-input" placeholder="100$" min="0" step="0.01" value="<?= e($filters['priceMax']) ?>">
                             </div>
                         </div>
                     </div>
@@ -207,7 +200,7 @@ $categories = $categoryRepo->findAll();
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Availability</h3>
                         <label class="form-checkbox">
-                            <input type="checkbox" name="in_stock" value="1" <?= $inStockOnly ? 'checked' : '' ?>>
+                            <input type="checkbox" name="in_stock" value="1" <?= $filters['inStock'] ? 'checked' : '' ?>>
                             <span>Only in stock</span>
                         </label>
                     </div>
@@ -220,18 +213,18 @@ $categories = $categoryRepo->findAll();
 
             <div class="catalog-main">
                 <div class="catalog-header">
-                    <p><strong><?= (int)count($filtered) ?></strong> products found</p>
+                    <p><strong><?= (int)count($products) ?></strong> products found</p>
 
                     <!-- SORT FORM (keeps existing filters) -->
                     <div class="catalog-header__sort">
                         <form method="GET" action="catalog.php">
-                            <?php foreach ((array)$selectedCategories as $c): ?>
+                            <?php foreach ((array)$filters['categories'] as $c): ?>
                                 <input type="hidden" name="categories[]" value="<?= e((string)$c) ?>">
                             <?php endforeach; ?>
-                            <input type="hidden" name="nameSearch" value="<?= e($nameSearch) ?>">
-                            <input type="hidden" name="price_min" value="<?= e($minPrice) ?>">
-                            <input type="hidden" name="price_max" value="<?= e($maxPrice) ?>">
-                            <?php if ($inStockOnly): ?>
+                            <input type="hidden" name="nameSearch" value="<?= e($filters['nameSearch']) ?>">
+                            <input type="hidden" name="price_min" value="<?= e($filters['priceMin']) ?>">
+                            <input type="hidden" name="price_max" value="<?= e($filters['priceMax']) ?>">
+                            <?php if ($filters['inStock']): ?>
                                 <input type="hidden" name="in_stock" value="1">
                             <?php endif; ?>
 
@@ -250,7 +243,7 @@ $categories = $categoryRepo->findAll();
                             echo '<input type="hidden" name="categories[]" value="' . e((string)$c) . '">';
                         }
                         ?>
-                        <input type="hidden" name="nameSearch" value="<?= e((string)($_GET['nameSearch'] ?? '')) ?>">
+                        <input type="hidden" name="nameSearch" value="<?= e((string)($filters['nameSearch'])) ?>">
                         <input type="hidden" name="price_min" value="<?= e((string)($_GET['price_min'] ?? '')) ?>">
                         <input type="hidden" name="price_max" value="<?= e((string)($_GET['price_max'] ?? '')) ?>">
                         <?php if (isset($_GET['in_stock'])): ?>
@@ -261,7 +254,7 @@ $categories = $categoryRepo->findAll();
 
                         <label>Per page:</label>
                         <select name="perPage" onchange="this.form.submit()">
-                            <?php foreach ([6, 12, 24, 48] as $n): ?>
+                            <?php foreach ([10, 15, 20, 25] as $n): ?>
                                 <option value="<?= $n ?>" <?= $perPage === $n ? 'selected' : '' ?>><?= $n ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -270,7 +263,7 @@ $categories = $categoryRepo->findAll();
                 </div>
 
                 <div class="products-grid">
-                    <?php foreach ($filtered as $p): ?>
+                    <?php foreach ($products as $p): ?>
                         <?php $stock = $p->getStock(); ?>
                         <article class="product-card">
                             <div class="product-card__image-wrapper">
