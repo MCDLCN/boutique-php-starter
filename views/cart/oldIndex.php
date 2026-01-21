@@ -48,7 +48,7 @@
                                         <input type="hidden" name="redirect" value="<?= e('/cart') ?>">
                                         <div class="quantity-selector">
                                             <button type="button" onclick="this.nextElementSibling.stepDown()">−</button>
-                                            <input type="number" name="quantityUpdate" value="<?= old('quantityUpdate', $item->getQuantity()) ?>" min="1" max="<?= (int)$product->getStock() ?>" style="width:50px">
+                                            <input type="number" name="quantityUpdate" value="<?= $qty ?>" min="1" max="<?= (int)$product->getStock() ?>" style="width:50px">
                                             <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
                                         </div>
 

@@ -21,4 +21,8 @@ abstract class Controller
         echo json_encode($data);
         exit;
     }
+    protected function isPost(): bool
+    {
+        return $_SERVER['REQUEST_METHOD'] === 'POST';
+    }
 }

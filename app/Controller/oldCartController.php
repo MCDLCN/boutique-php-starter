@@ -1,13 +1,18 @@
 <?php
-namespace App\Controller;
+//namespace App\Controller;
 
 use App\Repository\ProductRepository;
 use App\Repository\CategoryRepository;
 use App\Entity\Cart;
 use App\Database;
-class CartController extends Controller{
+class CartController {
     public function index(){
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
+        if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
+        $_SESSION['cart'] = new Cart();
+        }
+        $cart= $_SESSION['cart'];
 
         $cart = getCart();
 
@@ -30,13 +35,13 @@ class CartController extends Controller{
 
         $freeDelivery = $totalCart > 50;
 
-        $amountItems =$cart->countAllItems();
+        $amountItems =getCart()->countAllItems();
 
-        $this->view('cart/index',['cart'=>$cart,'totalCart'=>$totalCart,'freeDelivery'=>$freeDelivery,'amountItems'=>$amountItems,'currentlyHere'=>'cart']);
+        view('cart/index',['cart'=>$cart,'totalCart'=>$totalCart,'freeDelivery'=>$freeDelivery,'amountItems'=>$amountItems,'currentlyHere'=>'cart']);
     }
 
     public function add(): void{
-        $cart = getCart();
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
         $id = (int)($_POST['idCart'] ?? 0);
         $qty = max(1, (int)($_POST['quantityAdd'] ?? 1));
@@ -47,9 +52,12 @@ class CartController extends Controller{
 
         $product = $repo->find($id);
         if (!$product) {http_response_code(404); exit('No such product');}
+    
+        if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)){
+            $_SESSION['cart'] = new Cart();
+        }
 
-
-        $item = $cart->getCartItem($id);
+        $item = $_SESSION['cart']->getCartItem($id);
         if ($item !== null) {
             $current = $item->getQuantity();
             if ($product->canAddToCart($qty, $current)) {
@@ -62,7 +70,7 @@ class CartController extends Controller{
         } 
         else {
             if ($product->canAddToCart($qty, 0)) {
-                $cart->addProduct($product, quantity: $qty);
+                $_SESSION['cart']->addProduct($product, quantity: $qty);
                 flash('Success', 'Added to cart');}
             else {
             flash('Error', 'Not enough stock');
@@ -70,32 +78,32 @@ class CartController extends Controller{
         }
 
         $redirect = $_POST['redirect'] ?? '/catalog';
-        $this->redirect($redirect);
+        redirect($redirect);
         exit;
     
     }
 
     public function remove(): void {
-        $cart = getCart();
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
         $id = (int)($_POST['id'] ?? 0);
 
-        if (!($cart->getCartItem($id)===null)) {
-            $cart->removeProduct($id);
+        if (isset($_SESSION['cart']) && $_SESSION['cart'] instanceof Cart) {
+            $_SESSION['cart']->removeProduct($id);
         }
-        $this->redirect('/cart'); 
+        redirect('/cart'); 
         exit;
     }
 
     public function empty(): void{
-        $cart = getCart();
-        $cart->clear();
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        $_SESSION['cart']->clear();
         flash('Success', 'Cart emptied');
-        $this->redirect('/cart'); 
+        redirect('/cart'); 
         exit;
     }
 
     public function update():void {
-        $cart = getCart();
+        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
         $id = (int)($_POST['idCart'] ?? 0);
         $qty = max(1, (int)($_POST['quantityUpdate'] ?? 1));
@@ -108,12 +116,12 @@ class CartController extends Controller{
         if (!$product) {http_response_code(404); exit('No such product');}
 
         if ($product->getStock()<$qty) {flash('Error', 'Not enough stock');}
-        else{$cart->getCartItem($id)->setQuantity($qty);
+        else{$_SESSION['cart']->getCartItem($id)->setQuantity($qty);
         flash('Success', 'Quantity updated');}
 
         $redirect = $_POST['redirect'] ?? '/catalog';
         
-        $this->redirect($redirect);
+        redirect($redirect);
         exit;
     }
 }

@@ -174,7 +174,7 @@
                                             <input type="hidden" name="redirect" value="<?= e($_SERVER['REQUEST_URI']) ?>">
 
                                             <button type="button" onclick="this.nextElementSibling.stepDown()">−</button>
-                                            <input type="number" name="quantityAdd" value="<?= old('quantityAdd', 1) ?>" min="1" step="1">
+                                            <input type="number" name="quantityAdd" value="1" min="1" step="1">
                                             <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
 
                                             <button type="submit">Add</button>

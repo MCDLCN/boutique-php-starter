@@ -9,5 +9,10 @@
          "app/helpers.php",
          "config/constants.php"
         ]
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "laravel/pint": "^1.27",
+        "rector/rector": "^2.3"
     }
 }

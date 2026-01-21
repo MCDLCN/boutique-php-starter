@@ -5,17 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catalog - MyShop</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <header class="header">
     <div class="container header__container">
-        <a href="/" class="header__logo">🛍️ MyShop</a>
+        <a href="index.html" class="header__logo">🛍️ MyShop</a>
         <nav class="header__nav">
             <a href="/" class="header__nav-link <?= ($currentlyHere==="home")? "header__nav-link--active":"" ?>">Home</a>
             <a href="/catalog" class="header__nav-link <?= ($currentlyHere==="catalog")? "header__nav-link--active":"" ?>">Catalog</a>
-            <a href="/contact" class="header__nav-link <?= ($currentlyHere==="contact") ? "header__nav-link--active" : "" ?>">Contact</a>
+            <a href="contact.html" class="header__nav-link <?= ($currentlyHere==="contact")? "header__nav-link--active":"" ?></a>">Contact</a>
         </nav>
         <div class="header__actions">
             <a href="/cart" class="header__cart">🛒<span class="header__cart-badge"><?= isset($_SESSION['cart']) ? (int) $_SESSION['cart']->countUnique() : 0?></span></a>
@@ -26,11 +26,12 @@
 </header>
     
     <main>
-        <?php if (!empty($flash)): ?>
+        <?php $flash = getFlash();?>
+        <?php if (isset($flash)): ?>
             <?php $type = $flash['type']; ?>
             <?php $style = '';
                 if ($type === 'Success') {
-                    $style = 'background:#c2edce; border:1px solid #5fe15dff;';
+                    $style = 'background:#9bd49aff; border:1px solid #5fe15dff;';
                 }
                 if ($type === 'Error') {
                     $style = 'background:#F4E2E2; border:1px solid #E6ADA9;';

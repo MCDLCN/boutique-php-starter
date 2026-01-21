@@ -106,14 +106,12 @@ function redirect(string $url): void
 
 function session(string $key, mixed $default = null): mixed
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
     return $_SESSION[$key] ?? $default;
 }
 
 // Écrire une valeur en session
 function setSession(string $key, mixed $value): void
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
     $_SESSION[$key] = $value;
 }
 
@@ -135,14 +133,9 @@ function getFlash(): ?array
 }
 
 // Récupérer l'ancienne valeur d'un champ
-function old(string $key, mixed $default = null): mixed
+function old(string $key, string $default = ''): string
 {
-    $old = session('old', []);
-    $value = $old[$key] ?? $default;
-
-    unset($_SESSION['old'][$key]);
-
-    return $value;
+    return $_SESSION['old'][$key] ?? $default;
 }
 
 
@@ -160,14 +153,13 @@ function pageUrl(int $page): string {
 
 function getCart(): \App\Entity\Cart
 {
-    $cart = session('cart');
-    if (!($cart instanceof \App\Entity\Cart)){
-        $cart = new \App\Entity\Cart();
-        setSession('cart', $cart);
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
     }
-    return $cart;
-}
 
-function calculateVAT(float $priceExcludingTax, float $rate): float {
-    return $priceExcludingTax * ($rate / 100);
+    if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof \App\Entity\Cart)) {
+        $_SESSION['cart'] = new \App\Entity\Cart();
+    }
+
+    return $_SESSION['cart'];
 }
