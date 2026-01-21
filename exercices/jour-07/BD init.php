@@ -1,4 +1,5 @@
 <?php
+
 try {
     $pdo = new PDO(
         "mysql:host=localhost;dbname=boutique;charset=utf8mb4",
@@ -11,7 +12,8 @@ try {
     echo "❌ Error : " . $e->getMessage();
 }
 
-$stmt = $pdo->prepare("
+$stmt = $pdo->prepare(
+    "
 CREATE DATABASE IF NOT EXISTS boutique
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;

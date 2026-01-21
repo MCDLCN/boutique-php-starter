@@ -1,4 +1,5 @@
 <?php
+
 // Au lieu de :
 if (!isset($_SESSION['panier'])) {
     $_SESSION['panier'] = [];

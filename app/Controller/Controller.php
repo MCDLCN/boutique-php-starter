@@ -1,8 +1,12 @@
 <?php
+
 namespace App\Controller;
 
 abstract class Controller
 {
+    /**
+     * @param mixed[] $data
+     */
     protected function view(string $template, array $data = []): void
     {
         view($template, array_merge($data, [
@@ -15,6 +19,9 @@ abstract class Controller
         redirect($url);
     }
 
+    /**
+     * @param mixed[] $data
+     */
     protected function json(array $data): void
     {
         header('Content-Type: application/json');

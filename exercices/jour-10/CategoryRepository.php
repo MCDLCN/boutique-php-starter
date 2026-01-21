@@ -1,7 +1,10 @@
 <?php
+
 class CategoryRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function find(int $id): ?Category
     {
@@ -56,12 +59,14 @@ class CategoryRepository
         );
     }
 
-    public function delete(Category $category): void{
+    public function delete(Category $category): void
+    {
         $stmt = $this->pdo->prepare("DELETE FROM category WHERE id =?");
         $stmt->execute($category->getId());
     }
 
-    public function update(Category $category): void{
+    public function update(Category $category): void
+    {
         $stmt = $this->pdo->prepare("UPDATE category SET name = ? WHERE id = ?");
         $stmt->execute([$category->getName(), $category->getId()]);
     }
@@ -120,4 +125,4 @@ class CategoryRepository
 
         return array_values($out);
     }
-} 
+}

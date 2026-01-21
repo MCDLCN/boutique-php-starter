@@ -1,4 +1,5 @@
 <?php
+
 try {
     $pdo = new PDO(
         "mysql:host=localhost;dbname=boutique;charset=utf8mb4",

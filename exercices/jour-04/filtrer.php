@@ -1,4 +1,5 @@
 <?php
+
 $products = [
     [
         "name" => "Amogus",
@@ -62,11 +63,11 @@ $products = [
     ]
 ];
 
-$count=0;
+$count = 0;
 foreach ($products as $product) {
-	if ($product["stock"]>0 && $product["price"]<50){
-		echo $product["name"].'<br>';
-		$count++;
-	}
+    if ($product["stock"] > 0 && $product["price"] < 50) {
+        echo $product["name"].'<br>';
+        $count++;
+    }
 }
 echo $count.' displayed items out of '.count($products);

@@ -1,7 +1,8 @@
 <?php
-$a="5";
-$b=3;
-$c=$a + $b;
+
+$a = "5";
+$b = 3;
+$c = $a + $b;
 
 var_dump($a);
 var_dump($b);

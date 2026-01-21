@@ -4,16 +4,16 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 if (isset($_SESSION['username'])) {
-		$user = $_SESSION['username'];
-		echo "Hello $user";
-	} else {	 	
-		header("location: login.php");
-	}
+    $user = $_SESSION['username'];
+    echo "Hello $user";
+} else {
+    header("location: login.php");
+}
 
-	if (isset($_GET['logout'])) {
-		session_destroy();
-		header("location: login.php");
-	}
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("location: login.php");
+}
 
 ?>
 <br>

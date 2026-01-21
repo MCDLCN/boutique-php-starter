@@ -1,4 +1,5 @@
 <?php
+
 $product = [
     "name" => "iPhone 15",
     "price" => 999.99,

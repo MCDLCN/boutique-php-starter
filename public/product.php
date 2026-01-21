@@ -50,7 +50,7 @@ if ($product !== null && function_exists('displayStock')) {
     }
 }
 
-$esc = function(string $s): string {
+$esc = function (string $s): string {
     return function_exists('e') ? e($s) : htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 };
 ?>

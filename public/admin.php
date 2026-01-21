@@ -3,7 +3,7 @@ require_once __DIR__ . '/../app/helpers.php';
 $files = glob(__DIR__ . '/../app/Entity/*.php');
 
 foreach ($files as $file) {
-    require_once($file);   
+    require_once($file);
 }
 
 // Repositories
@@ -26,13 +26,13 @@ $action = $_POST['action'] ?? '';
 
 if ($action === 'add') {
     var_dump($_POST);
-    $productRepo->save(new Product(0,$_POST['name'],$_POST['description'],$_POST['price'],$_POST['stock'],$categoryRepo->find($_POST['category']), $_POST['discount'], $_POST['image'], date("Y-m-d",time())));
+    $productRepo->save(new Product(0, $_POST['name'], $_POST['description'], $_POST['price'], $_POST['stock'], $categoryRepo->find($_POST['category']), $_POST['discount'], $_POST['image'], date("Y-m-d", time())));
     header('Location: admin.php');
     exit;
 }
 
 if ($action === 'update') {
-    $productRepo->update(new Product($_POST['idUpdate'],$_POST['name'],$_POST['description'],$_POST['price'],$_POST['stock'],$categoryRepo->find($_POST['category']), $_POST['discount'], $_POST['image'], date("Y-m-d",time())));
+    $productRepo->update(new Product($_POST['idUpdate'], $_POST['name'], $_POST['description'], $_POST['price'], $_POST['stock'], $categoryRepo->find($_POST['category']), $_POST['discount'], $_POST['image'], date("Y-m-d", time())));
     header('Location: admin.php');
     exit;
 }

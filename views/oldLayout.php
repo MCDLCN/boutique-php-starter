@@ -13,9 +13,9 @@
     <div class="container header__container">
         <a href="index.html" class="header__logo">🛍️ MyShop</a>
         <nav class="header__nav">
-            <a href="/" class="header__nav-link <?= ($currentlyHere==="home")? "header__nav-link--active":"" ?>">Home</a>
-            <a href="/catalog" class="header__nav-link <?= ($currentlyHere==="catalog")? "header__nav-link--active":"" ?>">Catalog</a>
-            <a href="contact.html" class="header__nav-link <?= ($currentlyHere==="contact")? "header__nav-link--active":"" ?></a>">Contact</a>
+            <a href="/" class="header__nav-link <?= ($currentlyHere === "home") ? "header__nav-link--active" : "" ?>">Home</a>
+            <a href="/catalog" class="header__nav-link <?= ($currentlyHere === "catalog") ? "header__nav-link--active" : "" ?>">Catalog</a>
+            <a href="contact.html" class="header__nav-link <?= ($currentlyHere === "contact") ? "header__nav-link--active" : "" ?></a>">Contact</a>
         </nav>
         <div class="header__actions">
             <a href="/cart" class="header__cart">🛒<span class="header__cart-badge"><?= isset($_SESSION['cart']) ? (int) $_SESSION['cart']->countUnique() : 0?></span></a>
@@ -30,12 +30,12 @@
         <?php if (isset($flash)): ?>
             <?php $type = $flash['type']; ?>
             <?php $style = '';
-                if ($type === 'Success') {
-                    $style = 'background:#9bd49aff; border:1px solid #5fe15dff;';
-                }
-                if ($type === 'Error') {
-                    $style = 'background:#F4E2E2; border:1px solid #E6ADA9;';
-                }
+            if ($type === 'Success') {
+                $style = 'background:#9bd49aff; border:1px solid #5fe15dff;';
+            }
+            if ($type === 'Error') {
+                $style = 'background:#F4E2E2; border:1px solid #E6ADA9;';
+            }
             ?>
                 <div class="alert alert--info" style="<?= e($style) ?> color:black">
                 <?= e($type) ?>: 

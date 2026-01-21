@@ -1,45 +1,58 @@
 <?php
-abstract class Payment {
+
+abstract class Payment
+{
     public function __construct(
         protected float $amount
-    ) {}
-    
+    ) {
+    }
+
     // Méthode concrète : partagée par tous
-    public function getAmount(): float {
+    public function getAmount(): float
+    {
         return $this->amount;
     }
-    
+
     // Méthode abstraite : DOIT être implémentée par les enfants
     abstract public function process(): bool;
     abstract public function getProviderName(): string;
 }
 
-class CardPayment extends Payment {
-    public function process(): bool {
+class CardPayment extends Payment
+{
+    public function process(): bool
+    {
         return true;
     }
-    
-    public function getProviderName(): string {
+
+    public function getProviderName(): string
+    {
         return 'Stripe';
     }
 }
 
-class PaypalPayment extends Payment {
-    public function process(): bool {
+class PaypalPayment extends Payment
+{
+    public function process(): bool
+    {
         return true;
     }
-    
-    public function getProviderName(): string {
+
+    public function getProviderName(): string
+    {
         return 'Paypal';
     }
 }
 
-class BankPayment extends Payment {
-    public function process(): bool {
+class BankPayment extends Payment
+{
+    public function process(): bool
+    {
         return true;
     }
-    
-    public function getProviderName(): string {
+
+    public function getProviderName(): string
+    {
         return 'Bank';
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 $cart = ["T-shirt", "Jean"];
 
 // Ajouter à la fin

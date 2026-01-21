@@ -1,32 +1,39 @@
 <?php
-class Product {
+
+class Product
+{
     public function __construct(
         private string $name,
         private float $price
-    ) {}
-    
+    ) {
+    }
+
     // Appelée par echo $product ou (string)$product
-    public function __toString(): string {
+    public function __toString(): string
+    {
         return "{$this->name} ({$this->price} €)";
     }
-    
+
     // Appelée quand on accède à une propriété inexistante
-    public function __get(string $name): mixed {
+    public function __get(string $name): mixed
+    {
         if ($name === 'priceTTC') {
             return $this->price * 1.2;
         }
         throw new Exception("Propriété $name inexistante");
     }
 
-    public function __isset(string $name): bool {
-        if ($name === 'priceTTC') {   
+    public function __isset(string $name): bool
+    {
+        if ($name === 'priceTTC') {
             return true;
         }
         return false;
     }
 
-    public function __set(string $name, mixed $value): void {
-        if (property_exists($this, $name)) {   
+    public function __set(string $name, mixed $value): void
+    {
+        if (property_exists($this, $name)) {
             throw new Exception("$name is a read-only property");
         }
     }

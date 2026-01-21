@@ -2,18 +2,16 @@
 // public/catalog.php
 declare(strict_types=1);
 require_once __DIR__ . '/../vendor/autoload.php';
-use App\Repository\ProductRepository;
-use App\Repository\CategoryRepository;
-use App\Repository\AddressRepository;
-use App\Repository\UserRepository;
-use App\Entity\Product;
 use App\Database;
 use App\Entity\Cart;
-
+use App\Entity\Product;
+use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
 
 session_start();
 
-function getCart(): Cart {
+function getCart(): Cart
+{
     if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
         $_SESSION['cart'] = new Cart();
     }
@@ -242,7 +240,7 @@ $categories = $categoryRepo->findAll();
                         foreach ((array)($_GET['categories'] ?? []) as $c) {
                             echo '<input type="hidden" name="categories[]" value="' . e((string)$c) . '">';
                         }
-                        ?>
+?>
                         <input type="hidden" name="nameSearch" value="<?= e((string)($filters['nameSearch'])) ?>">
                         <input type="hidden" name="price_min" value="<?= e((string)($_GET['price_min'] ?? '')) ?>">
                         <input type="hidden" name="price_max" value="<?= e((string)($_GET['price_max'] ?? '')) ?>">

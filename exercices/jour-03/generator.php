@@ -1,6 +1,8 @@
 <?php
+
 // Fonction classique : charge TOUT en mémoire
-function getNumbers($max) {
+function getNumbers($max)
+{
     $result = [];
     for ($i = 0; $i < $max; $i++) {
         $result[] = $i;
@@ -9,7 +11,8 @@ function getNumbers($max) {
 }
 
 // Générateur : produit les valeurs à la demande
-function generateNumbers($max) {
+function generateNumbers($max)
+{
     for ($i = 0; $i < $max; $i++) {
         yield $i; // Retourne $i et "pause"
     }

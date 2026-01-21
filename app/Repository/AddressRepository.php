@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Address;
@@ -9,7 +11,9 @@ use Throwable;
 
 final class AddressRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function find(int $id): ?Address
     {
@@ -56,7 +60,7 @@ final class AddressRepository
                     $user->getId(),
                     $address->getRoad(),
                     $address->getCity(),
-                    (string)$address->getPostalCode(),
+                    $address->getPostalCode(),
                     $address->getCountry(),
                 ]);
 
@@ -77,7 +81,7 @@ final class AddressRepository
             $user->getId(),
             $address->getRoad(),
             $address->getCity(),
-            (string)$address->getPostalCode(),
+            $address->getPostalCode(),
             $address->getCountry(),
         ]);
 
@@ -95,7 +99,7 @@ final class AddressRepository
         $stmt->execute([
             $address->getRoad(),
             $address->getCity(),
-            (string)$address->getPostalCode(),
+            $address->getPostalCode(),
             $address->getCountry(),
             $address->getId()
         ]);
@@ -126,6 +130,11 @@ final class AddressRepository
         }
     }
 
+    /**
+     * Summary of hydrate
+     * @param mixed[] $row
+     * @return Address
+     */
     private function hydrate(array $row): Address
     {
         return new Address(

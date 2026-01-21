@@ -61,7 +61,7 @@ $sale = 20;
 <?php $statut = $product["stock"] > 0 ? "stocked" : "notStocked";?>
 <div class="<?= $statut ?>" >
     <h3><?= $product["name"] ?>: <?= $product["onSale"] ? "🔥 PROMO" : "" ;?>
-    <?= $product["onSale"] ? '<s>'.$product["price"].'</s> '.round($product["price"]*0.8,2) : $product["price"];?>$
+    <?= $product["onSale"] ? '<s>'.$product["price"].'</s> '.round($product["price"] * 0.8, 2) : $product["price"];?>$
     </h3>
 
 </div>

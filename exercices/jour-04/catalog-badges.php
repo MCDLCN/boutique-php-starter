@@ -69,9 +69,11 @@ $inStock = 0;
 $onSale = 0;
 $outOfStock = 0;
 
-foreach ($products as $product){
-    $product["stock"]>0 ? $inStock++ : $outOfStock++;
-    if ($product["discount"]>0)  $onSale++;
+foreach ($products as $product) {
+    $product["stock"] > 0 ? $inStock++ : $outOfStock++;
+    if ($product["discount"] > 0) {
+        $onSale++;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -92,20 +94,27 @@ foreach ($products as $product){
             <div class="product">
                 <p>Image: <img src="<?= $product["image"] ?>" alt="<?= htmlspecialchars($product["name"]) ?>"></p>
                 <p><?= $product["name"];?></p>
-                <p><?= $product["discount"]>0 ? round($product["price"]*(1 - ($product["discount"]/100)), 2) : round($product["price"], 2); ?>$</p>
-                <?php if ($product["stock"]>0){echo '<p class="stocked"> available </p>';}
-                else {echo '<p class="outOfStock"> unavailable </p>';} ?>
-                <?php if ($product["new"]){
-                echo '<span class="badge badge-pill bg-primary"> New </span>';}
-                if ($product["discount"]>0){
-                echo '<span class="badge badge-pill bg-primary"> On sale! </span>';}
-                if ($product["stock"]<5 && $product["stock"]>0){
-                echo '<span class="badge badge-pill bg-primary"> Running out </span>';}
-                if ($product["stock"]===0){
-                echo '<span class="badge badge-pill bg-primary"> Out of stock </span>';} 
-                $canBuy= $product["stock"]>0 ? ' <button type="button">Buy!</button> ' : ' <button type="button" disabled>Buy!</button> ';
-                echo $canBuy;
-                ?>
+                <p><?= $product["discount"] > 0 ? round($product["price"] * (1 - ($product["discount"] / 100)), 2) : round($product["price"], 2); ?>$</p>
+                <?php if ($product["stock"] > 0) {
+                    echo '<p class="stocked"> available </p>';
+                } else {
+                    echo '<p class="outOfStock"> unavailable </p>';
+                } ?>
+                <?php if ($product["new"]) {
+                    echo '<span class="badge badge-pill bg-primary"> New </span>';
+                }
+            if ($product["discount"] > 0) {
+                echo '<span class="badge badge-pill bg-primary"> On sale! </span>';
+            }
+            if ($product["stock"] < 5 && $product["stock"] > 0) {
+                echo '<span class="badge badge-pill bg-primary"> Running out </span>';
+            }
+            if ($product["stock"] === 0) {
+                echo '<span class="badge badge-pill bg-primary"> Out of stock </span>';
+            }
+            $canBuy = $product["stock"] > 0 ? ' <button type="button">Buy!</button> ' : ' <button type="button" disabled>Buy!</button> ';
+            echo $canBuy;
+            ?>
             </div>
         <?php endforeach; ?>
     </div>

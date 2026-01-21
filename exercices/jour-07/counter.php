@@ -9,9 +9,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 $_SESSION["visits"] = isset($_SESSION["visits"]) ? $_SESSION["visits"] + 1 : 0;
 
 if (isset($_GET["reset"])) {
- $_SESSION["visits"] = 0;
- header("Location: counter.php");
- exit();
+    $_SESSION["visits"] = 0;
+    header("Location: counter.php");
+    exit();
 }
 echo 'You visited '.$_SESSION["visits"].' times';
 
@@ -23,6 +23,6 @@ echo 'You visited '.$_SESSION["visits"].' times';
 <?php
 
 if (isset($_GET["kill"])) {
-	session_destroy();
-	exit();
+    session_destroy();
+    exit();
 }

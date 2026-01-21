@@ -1,13 +1,18 @@
 <?php
+
 namespace App\Repository;
 
 use App\Entity\Category;
 use App\Entity\Product;
 use PDO;
+use RuntimeException;
+
 require_once __DIR__ ."/RepositoryInterface.php";
 class CategoryRepository implements RepositoryInterface
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function find(int $id): ?Category
     {
@@ -37,7 +42,9 @@ class CategoryRepository implements RepositoryInterface
         $stmt = $this->pdo->query(
             "SELECT id, name FROM category ORDER BY name"
         );
-
+        if ($stmt === false){
+            throw new RuntimeException('Query failed');
+        }
         return array_map(
             [$this, 'hydrate'],
             $stmt->fetchAll(PDO::FETCH_ASSOC)
@@ -54,6 +61,11 @@ class CategoryRepository implements RepositoryInterface
         $entity->setId((int)$this->pdo->lastInsertId());
     }
 
+    /**
+     * Summary of hydrate
+     * @param mixed[] $row
+     * @return Category
+     */
     private function hydrate(array $row): Category
     {
         return new Category(
@@ -62,16 +74,22 @@ class CategoryRepository implements RepositoryInterface
         );
     }
 
-    public function delete(int $id): void{
+    public function delete(int $id): void
+    {
         $stmt = $this->pdo->prepare("DELETE FROM category WHERE id =?");
         $stmt->execute([$id]);
     }
 
-    public function update(Category $category): void{
+    public function update(Category $category): void
+    {
         $stmt = $this->pdo->prepare("UPDATE category SET name = ? WHERE id = ?");
         $stmt->execute([$category->getName(), $category->getId()]);
     }
 
+    /**
+     * Summary of findAllWithProducts
+     * @return mixed[]
+     */
     public function findAllWithProducts(): array
     {
         $sql = "
@@ -92,6 +110,9 @@ class CategoryRepository implements RepositoryInterface
         ";
 
         $stmt = $this->pdo->query($sql);
+        if ($stmt === false){
+            throw new RuntimeException('Query failed');
+        }
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $out = [];
@@ -126,4 +147,4 @@ class CategoryRepository implements RepositoryInterface
 
         return array_values($out);
     }
-} 
+}

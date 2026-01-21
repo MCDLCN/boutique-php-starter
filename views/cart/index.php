@@ -21,10 +21,10 @@
                     </thead>
                     <tbody>
                         <?php foreach ($cart->getItems() as $item): ?>
-                            <?php 
+                            <?php
                                 //var_dump($item);
-                                $qty = (int)$item->getQuantity(); 
-                                $product = $item->getProduct();
+                                $qty = (int)$item->getQuantity();
+                            $product = $item->getProduct();
                             ?>
                             <tr>
                                 <td>

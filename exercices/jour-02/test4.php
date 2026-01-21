@@ -1,4 +1,5 @@
 <?php
+
 $products = [
     [
         "name" => "T-shirt",

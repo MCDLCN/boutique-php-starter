@@ -1,4 +1,5 @@
 <?php
+
 class Car
 {
     public function __construct(
@@ -11,11 +12,13 @@ class Car
         }
     }
 
-    public function getAge(): int {
+    public function getAge(): int
+    {
         return (int)date('Y') - $this->year;
     }
 
-    public function display(): string {
+    public function display(): string
+    {
         return $this->brand . ' ' . $this->model . ' ' . $this->year . ' ' . $this->getAge();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use PDO;
@@ -11,7 +12,7 @@ class Database
 
     public static function getInstance(): PDO
     {
-        if (self::$instance === null) {
+        if (!self::$instance instanceof \PDO) {
             try {
                 self::$instance = new PDO(
                     'mysql:host=localhost;dbname=shop;charset=utf8mb4',

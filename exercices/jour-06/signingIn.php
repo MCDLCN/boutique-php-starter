@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($username)) {
-		$errors['username'][] = 'Username is required';		
-	}
+        $errors['username'][] = 'Username is required';
+    }
 
     if (strlen($username) < 3) {
         $errors['username'][] = 'Username must be at least 3 characters long';
@@ -30,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     if (empty($email)) {
-	 $errors['email'][] = 'Email is required';	
-	}
+        $errors['email'][] = 'Email is required';
+    }
     if (strlen($password) < 8) {
         $errors['password'][] = 'Password must be at least 8 characters long';
     }
@@ -44,16 +44,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <form method="POST">
     <input type="text" name="username" value="<?= e($username) ?>">
-    <?php if (isset($errors['username'])) foreach ($errors['username'] as $e) echo "<small>$e</small><br>"; ?>
+    <?php if (isset($errors['username'])) {
+        foreach ($errors['username'] as $e) {
+            echo "<small>$e</small><br>";
+        }
+    } ?>
     <br>
     <input type="text" name="email" value="<?= e($email) ?>">
-    <?php if (isset($errors['email'])) foreach ($errors['email'] as $e) echo "<small>$e</small><br>"; ?>
+    <?php if (isset($errors['email'])) {
+        foreach ($errors['email'] as $e) {
+            echo "<small>$e</small><br>";
+        }
+    } ?>
     <br>
     <input type="password" name="password">
-    <?php if (isset($errors['password'])) foreach ($errors['password'] as $e) echo "<small>$e</small><br>"; ?>
+    <?php if (isset($errors['password'])) {
+        foreach ($errors['password'] as $e) {
+            echo "<small>$e</small><br>";
+        }
+    } ?>
 	<br>
     <input type="password" name="confirmationPassword">
-    <?php if (isset($errors['confirmationPassword'])) foreach ($errors['confirmationPassword'] as $e) echo "<small>$e</small><br>"; ?>
+    <?php if (isset($errors['confirmationPassword'])) {
+        foreach ($errors['confirmationPassword'] as $e) {
+            echo "<small>$e</small><br>";
+        }
+    } ?>
     <br>
     <button type="submit">Send the stuff</button>
 </form>

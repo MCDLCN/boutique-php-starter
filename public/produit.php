@@ -20,9 +20,9 @@ $page = $_GET['page'] ?? 1;
 	<span style="font-size:40px;display:block;margin:0 auto;"><?= $desc; ?></span>
 	</div>
 	<br>
-	<span style="font-size:30px;">Only <?='<b>'.round($priceTaxed,2).CURRENCY.'</b>';?>!!!</span>
+	<span style="font-size:30px;">Only <?='<b>'.round($priceTaxed, 2).CURRENCY.'</b>';?>!!!</span>
 	<br>
-	<span style="font-size:10px;">Or <?='<b>'.number_format(priceTaxedDiscounted($priceTaxed,$discount), 2, ","," ").CURRENCY.'</b>';?> with our amazing discount</span>
+	<span style="font-size:10px;">Or <?='<b>'.number_format(priceTaxedDiscounted($priceTaxed, $discount), 2, ",", " ").CURRENCY.'</b>';?> with our amazing discount</span>
 	<br>
 	<span style="font-size: 25px">There's <span style= "font-size: 60px;"><?= '<b>'.$quantity.'</b>';?></span> plushies in stock</span>
 	<br>
@@ -31,6 +31,6 @@ $page = $_GET['page'] ?? 1;
 		<button type="submit">Send</button>
 	</form>
 	<?php $value = trim($_GET['valueButton'] ?? '');
-	echo $value === '' ? 'This is empty':$value;?>
+echo $value === '' ? 'This is empty' : $value;?>
 </body>
 </html> 

@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Entity;
+
 use InvalidArgumentException;
 
 class Product
@@ -14,7 +16,8 @@ class Product
         private int $discount,
         private string $image,
         private string $dateAdded
-    ) {}
+    ) {
+    }
 
     public function getId(): int
     {
@@ -23,12 +26,12 @@ class Product
 
     public function getName(): string
     {
-        return $this->name;   
+        return $this->name;
     }
 
     public function getDescription(): string
     {
-        return $this->description;   
+        return $this->description;
     }
 
     public function getPrice(): float
@@ -38,12 +41,12 @@ class Product
 
     public function getStock(): int
     {
-        return $this->stock;   
+        return $this->stock;
     }
 
     public function getCategory(): Category
     {
-        return $this->category;   
+        return $this->category;
     }
 
     public function getDiscount(): int
@@ -103,22 +106,26 @@ class Product
             ? $this->applyDiscount($this->discount)
             : $this->price;
     }
-   	public function canAddToCart(int $qty, int $currentInCart = 0): bool
+    public function canAddToCart(int $qty, int $currentInCart = 0): bool
     {
-        if ($qty < 1) return false;
+        if ($qty < 1) {
+            return false;
+        }
         return ($currentInCart + $qty) <= $this->stock;
     }
 
-    public function __toString():string
+    public function __toString(): string
     {
         return $this->name.' for '.$this->getFinalPrice();
     }
 
-    public function setPrice(int $price): void  {
+    public function setPrice(int $price): void
+    {
         $this->price = $price;
     }
 
-    public function setId(int $id): void {
+    public function setId(int $id): void
+    {
         $this->id = $id;
     }
 }

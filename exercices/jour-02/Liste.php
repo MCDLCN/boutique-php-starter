@@ -1,9 +1,10 @@
 <?php
+
 $groceries = ["Tomato", "A will to live", "Banana", "Shirt", "Idk a fifth thing"];
 
 echo $groceries[0];
 echo '<br>';
-echo $groceries[count($groceries)-1];
+echo $groceries[count($groceries) - 1];
 echo '<br>';
 echo count($groceries);
 echo '<br>';

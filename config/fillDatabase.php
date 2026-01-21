@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -84,10 +85,14 @@ try {
     foreach ($products as $p) {
         $catName = (string)($p['category'] ?? '');
         $catName = trim($catName);
-        if ($catName === '') continue;
+        if ($catName === '') {
+            continue;
+        }
 
         $key = mb_strtolower($catName);
-        if (isset($seen[$key])) continue;
+        if (isset($seen[$key])) {
+            continue;
+        }
         $seen[$key] = true;
 
         $insertCategory->execute([$catName]);

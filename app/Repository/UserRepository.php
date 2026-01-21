@@ -1,23 +1,26 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repository;
+
 use App\Entity\User;
 use PDO;
-use RuntimeException;
 use PDOException;
+use RuntimeException;
 
 final class UserRepository
 {
     public function __construct(
         private PDO $pdo,
         private AddressRepository $addressRepo
-    ) {}
+    ) {
+    }
 
     public function find(int $id): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, date_inscription
+            "SELECT id, name, email, password_hash, registrationDate
              FROM users
              WHERE id = ?"
         );
@@ -30,7 +33,7 @@ final class UserRepository
     public function findByEmail(string $email): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, date_inscription
+            "SELECT id, name, email, password_hash, registrationDate
              FROM users
              WHERE email = ?"
         );
@@ -42,11 +45,13 @@ final class UserRepository
 
     public function findWithAddresses(?User $user): ?User
     {
-        if (!$user) return null;
+        if (!$user instanceof \App\Entity\User) {
+            return null;
+        }
 
         $addresses = $this->addressRepo->findByUserId($user->getId());
         foreach ($addresses as $address) {
-            $user->addAddress( $address);
+            $user->addAddress($address);
         }
 
         return $user;
@@ -56,10 +61,13 @@ final class UserRepository
     public function findAll(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT id, name, email, password_hash, date_inscription
+            "SELECT id, name, email, password_hash, registrationDate
              FROM users
              ORDER BY id DESC"
         );
+        if ($stmt === false) {
+            throw new RuntimeException("Query failed");
+        }
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map([$this, 'hydrate'], $rows);
@@ -69,35 +77,34 @@ final class UserRepository
     // Throws RuntimeException if email already exists
     public function save(User $user, string $plainPassword): void
     {
-        $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
-        if ($hash === false) {
-            throw new RuntimeException("Failed to hash password");
+        if ($plainPassword === ''){
+            throw new RuntimeException('Password cannot be empty');
         }
+
+        $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
 
         try {
             $stmt = $this->pdo->prepare(
-                "INSERT INTO users (name, email, password_hash, date_inscription)
+                "INSERT INTO users (name, email, password_hash, registrationDate)
                  VALUES (?, ?, ?, ?)"
             );
             $stmt->execute([
                 $user->getName(),
                 $user->getEmail(),
                 $hash,
-                $user->getDateInscription(), // or date('Y-m-d H:i:s')
+                $user->getRegistrationDate(), // or date('Y-m-d H:i:s')
             ]);
         } catch (PDOException $e) {
             if (($e->errorInfo[1] ?? null) === 1062) {
-                throw new RuntimeException("Email already exists");
+                throw new RuntimeException("Email already exists", $e->getCode(), $e);
             }
             throw $e;
         }
 
-        if (method_exists($user, 'setId')) {
-            $user->setId((int)$this->pdo->lastInsertId());
-        }
+        $user->setId((int)$this->pdo->lastInsertId());
     }
 
-    // UPDATE 
+    // UPDATE
     public function update(User $user): void
     {
         try {
@@ -111,7 +118,7 @@ final class UserRepository
             ]);
         } catch (PDOException $e) {
             if (($e->errorInfo[1] ?? null) === 1062) {
-                throw new RuntimeException("Email already exists");
+                throw new RuntimeException("Email already exists", $e->getCode(), $e);
             }
             throw $e;
         }
@@ -120,10 +127,11 @@ final class UserRepository
     // UPDATE (password)
     public function updatePassword(User $user, string $plainPassword): void
     {
-        $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
-        if ($hash === false) {
-            throw new RuntimeException("Failed to hash password");
+        if ($plainPassword === ''){
+            throw new RuntimeException('Password cannot be empty');
         }
+
+        $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
 
         $stmt = $this->pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
         $stmt->execute([$hash, $user->getId()]);
@@ -133,13 +141,15 @@ final class UserRepository
     public function verifyCredentials(string $email, string $plainPassword): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, date_inscription
+            "SELECT id, name, email, password_hash, registrationDate
              FROM users
              WHERE email = ?"
         );
         $stmt->execute([$email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) return null;
+        if (!$row) {
+            return null;
+        }
 
         if (!password_verify($plainPassword, (string)$row['password_hash'])) {
             return null;
@@ -161,13 +171,23 @@ final class UserRepository
         return $stmt->fetchColumn() !== false;
     }
 
+    /**
+     * Summary of hydrate
+     * @param array{
+     * id: int|string,
+     * name: string,
+     * email: string,
+     * registrationDate: string
+     * } $row
+     * @return User
+     */
     private function hydrate(array $row): User
     {
         return new User(
             (int)$row['id'],
             (string)$row['name'],
             (string)$row['email'],
-            (string)$row['date_inscription'],
+            (string)$row['registrationDate'],
             []
         );
     }

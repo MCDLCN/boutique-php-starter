@@ -1,10 +1,11 @@
 <?php
+
 // config/routes.php
 //require_once __DIR__ . '/../vendor/autoload.php';
-use App\Router;
-use App\Controller\HomeController;
 use App\Controller\CartController;
+use App\Controller\HomeController;
 use App\Controller\ProductController;
+use App\Router;
 
 $router = new Router();
 
@@ -24,4 +25,3 @@ $router->post('/cart/empty', [CartController::class,'empty']);
 // $router->post('/contact', [ContactController::class, 'send']);
 
 return $router;
-

@@ -1,6 +1,7 @@
 <?php
-$products=[
-	[
+
+$products = [
+    [
         "id" => 1,
         "name" => "Leather",
         "price" => 29.99,
@@ -48,7 +49,7 @@ $products=[
         "description" => "AAAA",
         "dateAdded" => "2023-02-15"
     ],
-	[
+    [
         "id" => 5,
         "name" => "Amogus",
         "price" => 299,
@@ -181,4 +182,3 @@ $products=[
         "dateAdded" => "2020-03-02"
     ]
 ];
-?>

@@ -4,6 +4,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 // use App\Controller\HomeController;
 use App\Router;
+
 // use App\Controller\ProductController;
 // use App\Controller\TestController;
 
@@ -14,7 +15,7 @@ use App\Router;
 $router = new router();
 
 // $router->get('/test',[TestController::class,'index']);
- require_once __DIR__ .'/../config/routes.php';
+require_once __DIR__ .'/../config/routes.php';
 
 
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

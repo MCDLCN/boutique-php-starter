@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 final class UserRepository
@@ -6,7 +7,8 @@ final class UserRepository
     public function __construct(
         private PDO $pdo,
         private AddressRepository $addressRepo
-    ) {}
+    ) {
+    }
 
     public function find(int $id): ?User
     {
@@ -36,11 +38,13 @@ final class UserRepository
 
     public function findWithAddresses(User $user): ?User
     {
-        if (!$user) return null;
+        if (!$user) {
+            return null;
+        }
 
         $addresses = $this->addressRepo->findByUserId($user);
         foreach ($addresses as $address) {
-            $user->addAddress( $address);
+            $user->addAddress($address);
         }
 
         return $user;
@@ -91,7 +95,7 @@ final class UserRepository
         }
     }
 
-    // UPDATE 
+    // UPDATE
     public function update(User $user): void
     {
         try {
@@ -133,7 +137,9 @@ final class UserRepository
         );
         $stmt->execute([$email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) return null;
+        if (!$row) {
+            return null;
+        }
 
         if (!password_verify($plainPassword, (string)$row['password_hash'])) {
             return null;

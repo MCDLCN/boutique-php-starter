@@ -1,8 +1,11 @@
 <?php
+
 //namespace App\Controller;
 
-class HomeController{
-    public function index():void {
+class HomeController
+{
+    public function index(): void
+    {
         $title = "Welcome to my shop";
         $currentlyHere = 'home';
         session_start();

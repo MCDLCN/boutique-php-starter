@@ -1,7 +1,7 @@
 <?php
+
 // public/index.php
 require_once __DIR__ . '/../../vendor/autoload.php';
-use App\Database;
 
 // Récupérer l'URL demandée
 $uri = $_SERVER['REQUEST_URI'];

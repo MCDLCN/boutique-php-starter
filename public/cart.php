@@ -2,19 +2,15 @@
 // public/cart.php
 declare(strict_types=1);
 require_once __DIR__ . '/../vendor/autoload.php';
-use App\Repository\ProductRepository;
-use App\Repository\CategoryRepository;
-use App\Repository\AddressRepository;
-use App\Repository\UserRepository;
 use App\Database;
 use App\Entity\Cart;
-
-
-
+use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
 
 session_start();
 
-function getCart(): Cart {
+function getCart(): Cart
+{
     if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
         $_SESSION['cart'] = new Cart();
     }
@@ -37,21 +33,23 @@ if ($action === 'add') {
     $product = $id > 0 ? $productRepo->find($id) : null;
     if (!$product) {
         $_SESSION['flash'] = 'Product not found';
-        header('Location: catalog.php'); exit;
+        header('Location: catalog.php');
+        exit;
     }
     if ($cart->getCartItem($id) !== null) {
         $current = $cart->getCartItem(id: $id)->getQuantity();
         if ($product->canAddToCart($qty, $current)) {
             $cart->getCartItem($id)->setQuantity($current + $qty);
-            $_SESSION['flash'] = 'Added to cart';}
-        else {
-        $_SESSION['flash'] = 'Not enough stock';}
-    } 
-    else {
+            $_SESSION['flash'] = 'Added to cart';
+        } else {
+            $_SESSION['flash'] = 'Not enough stock';
+        }
+    } else {
         if ($product->canAddToCart($qty, 0)) {
-            $cart->addProduct($product, $qty);}
-        else {
-        $_SESSION['flash'] = 'Not enough stock';}
+            $cart->addProduct($product, $qty);
+        } else {
+            $_SESSION['flash'] = 'Not enough stock';
+        }
     }
     header('Location: catalog.php');
     exit;
@@ -61,19 +59,24 @@ if ($action === 'update') {
     $id = (int)($_POST['idUpdate'] ?? 0);
     $qty = (int)($_POST['quantity'] ?? 1);
     $cart = getCart();
-    if ($id <= 0) { header('Location: cart.php'); exit; }
+    if ($id <= 0) {
+        header('Location: cart.php');
+        exit;
+    }
 
     $product = $productRepo->find($id);
     if (!$product) {
         $cart->removeProduct($id);
         $_SESSION['flash'] = "Product removed (Doesn't exist)";
-        header('Location: cart.php'); exit;
+        header('Location: cart.php');
+        exit;
     }
 
     if ($qty < 1) {
         $cart->removeProduct($id);
         $_SESSION['flash'] = 'Item removed';
-        header('Location: cart.php'); exit;
+        header('Location: cart.php');
+        exit;
     }
 
     $cart->getCartItem($id)->setQuantity(min($qty, $product->getStock()));
@@ -84,7 +87,9 @@ if ($action === 'update') {
 
 if ($action === 'remove') {
     $id = (int)($_POST['idRemove'] ?? 0);
-    if ($id > 0) getCart()->removeProduct($id);
+    if ($id > 0) {
+        getCart()->removeProduct($id);
+    }
     $_SESSION['flash'] = 'Item removed';
     header('Location: cart.php');
     exit;
@@ -178,10 +183,10 @@ $freeDelivery = $totalCart > 50;
                     </thead>
                     <tbody>
                         <?php foreach ($cart->getItems() as $item): ?>
-                            <?php 
+                            <?php
                                 //var_dump($item);
-                                $qty = (int)$item->getQuantity(); 
-                                $product = $item->getProduct();
+                                $qty = (int)$item->getQuantity();
+                            $product = $item->getProduct();
                             ?>
                             <tr>
                                 <td>

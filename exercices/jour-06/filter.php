@@ -16,8 +16,8 @@ if ($stock === false) {
 // Indice : utilise FILTER_VALIDATE_FLOAT avec des options
 
 $options2 = [
-  'options' => [   
-     "min_range" => 0.01, 
+  'options' => [
+     "min_range" => 0.01,
      "max_range" => 9999.99
     ]
 ];
@@ -25,11 +25,11 @@ $options2 = [
 $quantity = filter_var($_POST['stock'], FILTER_VALIDATE_FLOAT, $options2);
 
 if ($quantity === false) {
-    echo "Quantité invalide (doit être entre 0.01 et 9999.99)";   
+    echo "Quantité invalide (doit être entre 0.01 et 9999.99)";
 }
 
 $options3 = [
-    'price' => [   
+    'price' => [
         "min_range" => 0.01,
         "max_range" => 100000000
     ],
@@ -38,21 +38,23 @@ $options3 = [
         "max_range" => 100000000
     ]];
 $data = [
- "name" => $_POST['name'], 
+ "name" => $_POST['name'],
  "price" => $_POST['price'],
  "stock" => $_POST['stock']
 ];
 
-function validateProductForm($data) {
-    $errors=[];
-    if (preg_match('/^[a-z]*$/i', $data['name']) === 0){
+function validateProductForm($data)
+{
+    $errors = [];
+    if (preg_match('/^[a-z]*$/i', $data['name']) === 0) {
         $errors[] = "Invalid name";
     }
-    if (filter_var($data['price'], FILTER_VALIDATE_FLOAT) === false){
+    if (filter_var($data['price'], FILTER_VALIDATE_FLOAT) === false) {
         $errors[] = "Invalid price";
     }
-    if (filter_var($data['stock'], FILTER_VALIDATE_INT) === false){
-        $errors[] = "Invalid stock";}
+    if (filter_var($data['stock'], FILTER_VALIDATE_INT) === false) {
+        $errors[] = "Invalid stock";
+    }
     return $errors;
 }
 

@@ -67,8 +67,11 @@ $products = [
                 <p>Image: <img src="<?= $product["image"] ?>" alt="<?= htmlspecialchars($product["name"]) ?>"></p>
                 <p><?= $product["name"];?></p>
                 <p><?php echo round($product["price"], 2); ?>$</p>
-                <?php if ($product["stock"]>0){echo '<p class="stocked"> available </p>';}
-                else {echo '<p class="outOfStock"> unavailable </p>';} ?>
+                <?php if ($product["stock"] > 0) {
+                    echo '<p class="stocked"> available </p>';
+                } else {
+                    echo '<p class="outOfStock"> unavailable </p>';
+                } ?>
             </div>
         <?php endforeach; ?>
     </div>

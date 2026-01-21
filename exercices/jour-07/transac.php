@@ -1,4 +1,5 @@
 <?php
+
 $pdo->beginTransaction();
 
 try {
@@ -6,7 +7,7 @@ try {
     $stmt = $pdo->prepare("INSERT INTO commandes (user_id, total) VALUES (?, ?)");
     $stmt->execute([$userId, $total]);
     $commandeId = $pdo->lastInsertId();
-    
+
     // 2. Décrémenter le stock de chaque produit
     // À toi : UPDATE produits SET stock = stock - ? WHERE id = ?
     $stmt = $pdo->prepare("UPDATE produits SET stock = stock - ? WHERE id = ?");
@@ -17,7 +18,7 @@ try {
 
     // 3. Si tout est OK, valider
     $pdo->commit();
-    
+
 } catch (Exception $e) {
     // 4. Si erreur, annuler TOUT
     $pdo->rollBack();

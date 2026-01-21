@@ -1,16 +1,18 @@
 <?php
+
 class Category
 {
-	public function __construct(
-		private int $id,
-		private string $name,
-		private string $description
-	)
-	{}
+    public function __construct(
+        private int $id,
+        private string $name,
+        private string $description
+    ) {
+    }
 
-	public function getSlug(): string{
-		return strtolower(str_replace(' ', '-', $this->name));
-	}
+    public function getSlug(): string
+    {
+        return strtolower(str_replace(' ', '-', $this->name));
+    }
 }
 
 $category1 = new Category(1, 'a a AAAAAAAAAAAAAA  aaa aaa  a a aaCategory 1', 'Category 1 description');

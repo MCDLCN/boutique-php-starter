@@ -21,7 +21,7 @@ echo '<br>';
 </head>
 <body>
 <?php foreach ($products as $product) {
- echo '<strong>'.$product["name"].'</strong><br>Price: '.$product["price"].'$. '.$product["stock"].' in stock <br>';   
+    echo '<strong>'.$product["name"].'</strong><br>Price: '.$product["price"].'$. '.$product["stock"].' in stock <br>';
 }
 ?>
 </body>

@@ -8,7 +8,8 @@ class Product
         private float $price,
         private int $stock,
         private Category $category
-    ) {}
+    ) {
+    }
 
     public function getId(): int
     {
@@ -17,12 +18,12 @@ class Product
 
     public function getName(): string
     {
-        return $this->name;   
+        return $this->name;
     }
 
     public function getDescription(): string
     {
-        return $this->description;   
+        return $this->description;
     }
 
     public function getPrice(): float
@@ -32,12 +33,12 @@ class Product
 
     public function getStock(): int
     {
-        return $this->stock;   
+        return $this->stock;
     }
 
     public function getCategory(): Category
     {
-        return $this->category;   
+        return $this->category;
     }
 
     public function getDiscount(): int
@@ -97,9 +98,11 @@ class Product
             ? $this->applyDiscount($this->discount)
             : $this->price;
     }
-   	public function canAddToCart(int $qty, int $currentInCart = 0): bool
+    public function canAddToCart(int $qty, int $currentInCart = 0): bool
     {
-        if ($qty < 1) return false;
+        if ($qty < 1) {
+            return false;
+        }
         return ($currentInCart + $qty) <= $this->stock;
     }
 }
@@ -110,8 +113,9 @@ class Category
     private int $count = 0;
     public function __construct(
         private string $name
-    ) {}
-    
+    ) {
+    }
+
     public function getName(): string
     {
         return $this->name;
@@ -119,7 +123,7 @@ class Category
 
     public function increaseCount(): void
     {
-        $this->count++;  
+        $this->count++;
     }
 
     public function getCount(): int
@@ -129,8 +133,8 @@ class Category
 
     public static function fromName(string $name): self
     {
-        $key=mb_strtolower(trim($name));
-        return self::$pool['key']??=new self($name);
+        $key = mb_strtolower(trim($name));
+        return self::$pool['key'] ??= new self($name);
     }
 
     public function __toString(): string

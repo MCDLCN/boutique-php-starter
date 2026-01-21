@@ -1,16 +1,19 @@
 <?php
-class QueryBuilder {
+
+class QueryBuilder
+{
     private string $table;
     private array $conditions = [];
     private array $params = [];
     private array $orderBy = [];
     private ?int $limit = null;
     private ?int $offset = null;
-    
-    public function __construct(string $table) {
+
+    public function __construct(string $table)
+    {
         $this->table = $table;
     }
-    
+
     public function where(string $field, string $operator, mixed $value): self
     {
         $this->conditions[] = [
@@ -30,7 +33,7 @@ class QueryBuilder {
         ];
         return $this;
     }
-    
+
     public function orderBy(string $field, string $direction = 'ASC'): self
     {
         $direction = strtoupper($direction);
@@ -41,13 +44,14 @@ class QueryBuilder {
         $this->orderBy[] = $field . ' ' . $direction;
         return $this;
     }
-    
-    public function limit(int $limit, int $offset = 0): self {
+
+    public function limit(int $limit, int $offset = 0): self
+    {
         $this->limit = $limit;
         $this->offset = $offset;
         return $this;
     }
-    
+
     public function getSQL(): string
     {
         $sql = "SELECT * FROM {$this->table}";
@@ -78,8 +82,9 @@ class QueryBuilder {
 
         return $sql;
     }
-    
-    public function getParams(): array {
+
+    public function getParams(): array
+    {
         return $this->params;
     }
 }

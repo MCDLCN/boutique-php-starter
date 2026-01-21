@@ -1,18 +1,23 @@
 <?php
+
 //namespace App\Controller;
 
-use App\Repository\ProductRepository;
-use App\Repository\CategoryRepository;
-use App\Entity\Cart;
 use App\Database;
-class CartController {
-    public function index(){
-        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+use App\Entity\Cart;
+use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
+
+class CartController
+{
+    public function index()
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
 
         if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
-        $_SESSION['cart'] = new Cart();
+            $_SESSION['cart'] = new Cart();
         }
-        $cart= $_SESSION['cart'];
 
         $cart = getCart();
 
@@ -24,7 +29,7 @@ class CartController {
 
         foreach (array_keys($cart->getItems()) as $id) {
             $product = $productRepo->find((int)$id);
-            if ($product === null) {
+            if (!$product instanceof \App\Entity\Product) {
                 $cart->removeProduct((int)$id);
                 continue;
             }
@@ -35,92 +40,109 @@ class CartController {
 
         $freeDelivery = $totalCart > 50;
 
-        $amountItems =getCart()->countAllItems();
+        $amountItems = getCart()->countAllItems();
 
-        view('cart/index',['cart'=>$cart,'totalCart'=>$totalCart,'freeDelivery'=>$freeDelivery,'amountItems'=>$amountItems,'currentlyHere'=>'cart']);
+        view('cart/index', ['cart' => $cart,'totalCart' => $totalCart,'freeDelivery' => $freeDelivery,'amountItems' => $amountItems,'currentlyHere' => 'cart']);
     }
 
-    public function add(): void{
-        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    public function add(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
 
         $id = (int)($_POST['idCart'] ?? 0);
         $qty = max(1, (int)($_POST['quantityAdd'] ?? 1));
 
-        $pdo= Database::getInstance();
-        $catRepo= new CategoryRepository($pdo);
+        $pdo = Database::getInstance();
+        $catRepo = new CategoryRepository($pdo);
         $repo = new ProductRepository($pdo, $catRepo);
 
         $product = $repo->find($id);
-        if (!$product) {http_response_code(404); exit('No such product');}
-    
-        if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)){
+        if (!$product instanceof \App\Entity\Product) {
+            http_response_code(404);
+            exit('No such product');
+        }
+
+        if (!isset($_SESSION['cart']) || !($_SESSION['cart'] instanceof Cart)) {
             $_SESSION['cart'] = new Cart();
         }
 
         $item = $_SESSION['cart']->getCartItem($id);
-        if ($item !== null) {
+        if ($item instanceof \App\Entity\CartItem) {
             $current = $item->getQuantity();
             if ($product->canAddToCart($qty, $current)) {
                 $item->setQuantity($current + $qty);
                 flash('Success', 'Added to cart');
+            } else {
+                flash('Error', 'Not enough stock');
             }
-            else {
+        } elseif ($product->canAddToCart($qty, 0)) {
+            $_SESSION['cart']->addProduct($product, quantity: $qty);
+            flash('Success', 'Added to cart');
+        } else {
             flash('Error', 'Not enough stock');
-            }
-        } 
-        else {
-            if ($product->canAddToCart($qty, 0)) {
-                $_SESSION['cart']->addProduct($product, quantity: $qty);
-                flash('Success', 'Added to cart');}
-            else {
-            flash('Error', 'Not enough stock');
-            }
         }
 
         $redirect = $_POST['redirect'] ?? '/catalog';
         redirect($redirect);
         exit;
-    
+
     }
 
-    public function remove(): void {
-        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    public function remove(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         $id = (int)($_POST['id'] ?? 0);
 
         if (isset($_SESSION['cart']) && $_SESSION['cart'] instanceof Cart) {
             $_SESSION['cart']->removeProduct($id);
         }
-        redirect('/cart'); 
+        redirect('/cart');
         exit;
     }
 
-    public function empty(): void{
-        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    public function empty(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         $_SESSION['cart']->clear();
         flash('Success', 'Cart emptied');
-        redirect('/cart'); 
+        redirect('/cart');
         exit;
     }
 
-    public function update():void {
-        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    public function update(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
 
         $id = (int)($_POST['idCart'] ?? 0);
         $qty = max(1, (int)($_POST['quantityUpdate'] ?? 1));
 
-        $pdo= Database::getInstance();
-        $catRepo= new CategoryRepository($pdo);
+        $pdo = Database::getInstance();
+        $catRepo = new CategoryRepository($pdo);
         $repo = new ProductRepository($pdo, $catRepo);
 
         $product = $repo->find($id);
-        if (!$product) {http_response_code(404); exit('No such product');}
+        if (!$product instanceof \App\Entity\Product) {
+            http_response_code(404);
+            exit('No such product');
+        }
 
-        if ($product->getStock()<$qty) {flash('Error', 'Not enough stock');}
-        else{$_SESSION['cart']->getCartItem($id)->setQuantity($qty);
-        flash('Success', 'Quantity updated');}
+        if ($product->getStock() < $qty) {
+            flash('Error', 'Not enough stock');
+        } else {
+            $_SESSION['cart']->getCartItem($id)->setQuantity($qty);
+            flash('Success', 'Quantity updated');
+        }
 
         $redirect = $_POST['redirect'] ?? '/catalog';
-        
+
         redirect($redirect);
         exit;
     }

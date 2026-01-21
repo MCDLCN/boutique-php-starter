@@ -17,11 +17,11 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
     $ids = array_keys($_SESSION['cart']);
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
     $stmt = $pdo->prepare(
-    "SELECT * FROM products WHERE id IN ($placeholders)"
-);
+        "SELECT * FROM products WHERE id IN ($placeholders)"
+    );
 
-$stmt->execute($ids);
-$productsInCart = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->execute($ids);
+    $productsInCart = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 
@@ -52,7 +52,7 @@ if ($action === 'add') {
         exit;
     }
 
-    
+
 }
 
 if ($action === 'update') {
@@ -96,7 +96,7 @@ if ($action === 'emptyCart') {
 //     $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = ?");
 //     $stmt->execute([$id]);
 //     $stock = $stmt->fetchAll(PDO::FETCH_ASSOC);
-//     if ($quantity + $currentQuantity <= $stock{   
+//     if ($quantity + $currentQuantity <= $stock{
 //         if (!isset($_SESSION["cart"][$id])) {
 //             $_SESSION["cart"][$id] = intval($quantity);
 //             echo "<script>alert ('Added to cart')</script>";
@@ -112,12 +112,12 @@ if ($action === 'emptyCart') {
 
 
 // if (isset($_POST['remove'])) {
-//     $id = $_POST['idRemove'];       
+//     $id = $_POST['idRemove'];
 //     unset($_SESSION['cart'][$id]);
 // }
 
 // if (isset($_POST['emptyCart'])) {
-// unset($_SESSION['cart']);   
+// unset($_SESSION['cart']);
 // }
 
 // if (isset($_POST['update'])) {
@@ -127,7 +127,7 @@ if ($action === 'emptyCart') {
 //     $quantity = ($_POST["quantityToAdd"] ?? 0);
 //     $currentQuantity = $_SESSION['cart'][$_POST['idUpdate']];
 //     if ($quantity + $currentQuantity <= $stock && $quantity + $currentQuantity > 0) {
-//         $id = $_POST['idUpdate'];   
+//         $id = $_POST['idUpdate'];
 //         $quantity = $_POST['quantity'];
 //         $_SESSION['cart'][$id] = $quantity;
 //     }else{
@@ -146,7 +146,8 @@ if (!isset($_SESSION["totalItemsCart"])) {
 
 $_SESSION["totalItemsCart"] = 0;
 foreach ($_SESSION["cart"] as $key => $value) {
-         $_SESSION["totalItemsCart"] += $value ;}
+    $_SESSION["totalItemsCart"] += $value ;
+}
 
 //Total price of products in the cart
 $_SESSION['totalCart'] = 0;
@@ -251,7 +252,7 @@ foreach ($_SESSION["cart"] as $key => $value) {
                         <!-- JOUR 7 : Récupérer les infos produit depuis la BDD -->
 
                         <!-- Article 1 -->
-                        <?php foreach ($productsInCart as $product ): ?>
+                        <?php foreach ($productsInCart as $product): ?>
                         <tr>
                             <td>
                                 <div class="cart-item">
@@ -266,7 +267,7 @@ foreach ($_SESSION["cart"] as $key => $value) {
                                 </div>
                             </td>
                             <td>
-                                <?= formatPrice($product['price']*(1 - $product['discount']/100)) ?>
+                                <?= formatPrice($product['price'] * (1 - $product['discount'] / 100)) ?>
                             </td>
                             <td>
                                 <!-- JOUR 7 : Formulaire pour modifier la quantité -->
@@ -292,7 +293,7 @@ foreach ($_SESSION["cart"] as $key => $value) {
                                 </form>
                             </td>
                             <td>    
-                                <span class="cart-item__total"><?= formatPrice($product['price']*$_SESSION['cart'][$product['id']] * (1 - $product['discount']/100)) ?></span>
+                                <span class="cart-item__total"><?= formatPrice($product['price'] * $_SESSION['cart'][$product['id']] * (1 - $product['discount'] / 100)) ?></span>
                             </td>
                             <td>
                                 <!-- JOUR 7 : Formulaire pour supprimer -->
@@ -334,7 +335,7 @@ foreach ($_SESSION["cart"] as $key => $value) {
                 </div>
                 <div class="cart-summary__row">
                     <span>VAT (20%)</span>
-                    <span><?= formatPrice($_SESSION['totalCart']*0.2) ?></span>
+                    <span><?= formatPrice($_SESSION['totalCart'] * 0.2) ?></span>
                 </div>
                 <div class="cart-summary__row">
                     <span>Delivery</span>
@@ -350,9 +351,9 @@ foreach ($_SESSION["cart"] as $key => $value) {
                 <div class="cart-summary__row cart-summary__row--total">
                     <span>Total ATI</span>
                     <?php if ($freeDelivery): ?>
-                        <span><?= formatPrice($_SESSION['totalCart']+$_SESSION['totalCart']*0.2) ?></span>
+                        <span><?= formatPrice($_SESSION['totalCart'] + $_SESSION['totalCart'] * 0.2) ?></span>
                     <?php else: ?>
-                        <span><?= formatPrice($_SESSION['totalCart']+$_SESSION['totalCart']*0.2+5.99) ?></span>
+                        <span><?= formatPrice($_SESSION['totalCart'] + $_SESSION['totalCart'] * 0.2 + 5.99) ?></span>
                     <?php endif; ?>
                 </div>
 

@@ -15,7 +15,7 @@ $person = [
 </head>
 <body>
 <?php foreach ($person as $key => $value) {
- echo '<strong>'.$key.'</strong>: '.$value.'<br>';   
+    echo '<strong>'.$key.'</strong>: '.$value.'<br>';
 }
 ?>
 </body>

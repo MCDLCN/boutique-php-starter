@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ ."/../../app/entities/Product.php";
 require_once __DIR__ ."/../../app/entities/Category.php";
 class ProductRepository
@@ -6,30 +7,31 @@ class ProductRepository
     public function __construct(
         private PDO $pdo,
         private CategoryRepository $categoryRepo
-    ) {}
-    
+    ) {
+    }
+
     // READ - Un seul
     public function find(int $id): ?Product
     {
         $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = ?");
         $stmt->execute([$id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $data ? $this->hydrate($data) : null;
     }
-    
+
     // READ - Tous
     public function findAll(): array
     {
         $stmt = $this->pdo->query("SELECT * FROM products");
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    
+
     // CREATE
     public function save(Product $product): void
     {
         $stmt = $this->pdo->prepare(
-        "INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
+            "INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([
@@ -44,7 +46,7 @@ class ProductRepository
         ]);
         $product->setId((int) $this->pdo->lastInsertId());
     }
-    
+
     // UPDATE
     public function update(Product $product): void
     {
@@ -58,14 +60,14 @@ class ProductRepository
             $product->getId()
         ]);
     }
-    
+
     // DELETE
     public function delete(int $id): void
     {
         $stmt = $this->pdo->prepare("DELETE FROM products WHERE id = ?");
         $stmt->execute([$id]);
     }
-    
+
     // Hydratation : tableau → objet
     private function hydrate(array $data): Product
     {
@@ -92,7 +94,7 @@ class ProductRepository
         $stmt->execute([$category]);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    
+
     public function findInStock(): array
     {
         $stmt = $this->pdo->query(
@@ -100,7 +102,7 @@ class ProductRepository
         );
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    
+
     public function search(string $term): array
     {
         $stmt = $this->pdo->prepare(
@@ -110,7 +112,8 @@ class ProductRepository
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function findByPriceRange(float $min, float $max):array{
+    public function findByPriceRange(float $min, float $max): array
+    {
         $stmt = $this->pdo->prepare(
             "SELECT * FROM products WHERE price>=? AND price<=?"
         );
@@ -118,7 +121,8 @@ class ProductRepository
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function findWithProduct(): array{
+    public function findWithProduct(): array
+    {
         $stmt = $this->pdo->prepare(
             "SELECT * FROM products GROUP BY category"
         );

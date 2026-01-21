@@ -27,7 +27,7 @@ if (isset($_POST["idCart"])) {
     $id = $_POST["idCart"];
     $quantity = ($_POST["quantity"] ?? 0);
     $currentQuantity = $_SESSION["cart"][$id] ?? 0;
-    if ($quantity + $currentQuantity <= $products[$_POST["idCart"]]["stock"]){   
+    if ($quantity + $currentQuantity <= $products[$_POST["idCart"]]["stock"]) {
         if (!isset($_SESSION["cart"][$id])) {
             $_SESSION["cart"][$id] = intval($quantity);
             echo "<script>alert ('Added to cart')</script>";
@@ -35,8 +35,8 @@ if (isset($_POST["idCart"])) {
             $_SESSION["cart"][$id] = $_SESSION["cart"][$id] + $quantity;
             echo "<script>alert ('Added to cart')</script>";
         }
-    }else {
-    echo "<script>alert ('Not enough stock')</script>";
+    } else {
+        echo "<script>alert ('Not enough stock')</script>";
     }
 }
 
@@ -46,9 +46,11 @@ if (!isset($_SESSION["totalItemsCart"])) {
 if (isset($_SESSION["cart"])) {
     $_SESSION["totalItemsCart"] = 0;
     foreach ($_SESSION["cart"] as $key => $value) {
-            $_SESSION["totalItemsCart"] += $value ;}
+        $_SESSION["totalItemsCart"] += $value ;
+    }
 } else {
-    $_SESSION["totalItemsCart"] = 0;}
+    $_SESSION["totalItemsCart"] = 0;
+}
 
 ?>
 

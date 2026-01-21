@@ -1,7 +1,9 @@
 <?php
-namespace App\Entity;
-class Address{
 
+namespace App\Entity;
+
+class Address
+{
     public function __construct(
         private ?int $id,
         private int $userId,
@@ -10,8 +12,9 @@ class Address{
         private string $postalCode,
         private string $country,
         private bool $isDefault
-        ){}
-        
+    ) {
+    }
+
 
     public function __toString(): string
     {
@@ -19,30 +22,37 @@ class Address{
     }
 
 
-    public function getRoad(): string{
+    public function getRoad(): string
+    {
         return $this->road;
     }
 
-    public function getCity(): string{
+    public function getCity(): string
+    {
         return $this->city;
     }
 
-    public function getPostalCode(): string{
+    public function getPostalCode(): string
+    {
         return $this->postalCode;
     }
-    public function getCountry(): string{
+    public function getCountry(): string
+    {
         return $this->country;
     }
 
-    public function getId(): int{
+    public function getId(): ?int
+    {
         return $this->id;
     }
 
-    public function getUserId(): int{
+    public function getUserId(): int
+    {
         return $this->userId;
     }
 
-    public function isDefault(): bool{
+    public function isDefault(): bool
+    {
         return $this->isDefault;
     }
 }

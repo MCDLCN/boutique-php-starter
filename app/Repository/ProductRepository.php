@@ -1,40 +1,49 @@
 <?php
+
 namespace App\Repository;
 
-use PDO;
-use App\Entity\Product;
 use App\Entity\Category;
+use App\Entity\Product;
+use PDO;
+use RuntimeException;
 
-use App\Repository\RepositoryInterface;
-class ProductRepository implements RepositoryInterface 
+class ProductRepository implements RepositoryInterface
 {
     public function __construct(
         private PDO $pdo,
         private CategoryRepository $categoryRepo
-    ) {}
-    
+    ) {
+    }
+
     // READ - Un seul
     public function find(int $id): ?Product
     {
         $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = ?");
         $stmt->execute([$id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         return $data ? $this->hydrate($data) : null;
     }
-    
+
     // READ - Tous
+    /**
+     * Summary of findAll
+     * @return Product[]
+     */
     public function findAll(): array
     {
         $stmt = $this->pdo->query("SELECT * FROM products");
+        if ($stmt === false){
+            throw new RuntimeException('Query failed');
+        }
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    
+
     // CREATE
     public function save(object $entity): void
     {
         $stmt = $this->pdo->prepare(
-        "INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
+            "INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([
@@ -49,7 +58,7 @@ class ProductRepository implements RepositoryInterface
         ]);
         $entity->setId((int) $this->pdo->lastInsertId());
     }
-    
+
     // UPDATE
     public function update(Product $product): void
     {
@@ -67,32 +76,44 @@ class ProductRepository implements RepositoryInterface
             $product->getId()
         ]);
     }
-    
+
     // DELETE
     public function delete(int $id): void
     {
         $stmt = $this->pdo->prepare("DELETE FROM products WHERE id = ?");
         $stmt->execute([$id]);
     }
-    
+
     // Hydratation : tableau → objet
+    /**
+     * Summary of hydrate
+     * @param mixed[] $data
+     * @return Product
+     */
     private function hydrate(array $data): Product
     {
         $category = $this->categoryRepo->find((int) $data['category']);
-
+        if ($category === null){
+            throw new RuntimeException('Category not found for product'. $data['id']);
+        }
         return new Product(
             id: (int) $data['id'],
             name: (string) $data['name'],
-            description: (string) $data['description'] ?? '',
+            description: (string) ($data['description'] ?? ''),
             price: (float) $data['price'],
             stock: (int) $data['stock'],
             category: $category,
-            discount: (int) $data['discount'] ?? 0,
-            image: (string) $data['image'] ?? '',
-            dateAdded: (string) $data['dateAdded'] ?? ''
+            discount: (int) ($data['discount'] ?? 0),
+            image: (string) ($data['image'] ?? ''),
+            dateAdded: (string) ($data['dateAdded'] ?? '')
         );
     }
 
+    /**
+     * Summary of findByCategory
+     * @param Category $category
+     * @return Product[]
+     */
     public function findByCategory(Category $category): array
     {
         $stmt = $this->pdo->prepare(
@@ -101,15 +122,27 @@ class ProductRepository implements RepositoryInterface
         $stmt->execute([$category->getId()]);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    
+
+    /**
+     * Summary of findInStock
+     * @return Product[]
+     */
     public function findInStock(): array
     {
         $stmt = $this->pdo->query(
             "SELECT * FROM products WHERE stock > 0"
         );
+        if ($stmt === false){
+            throw new RuntimeException('Query failed');
+        }
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
-    
+
+    /**
+     * Summary of search
+     * @param string $term
+     * @return Product[]
+     */
     public function search(string $term): array
     {
         $stmt = $this->pdo->prepare(
@@ -119,7 +152,14 @@ class ProductRepository implements RepositoryInterface
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function findByPriceRange(float $min, float $max):array{
+    /**
+     * Summary of findByPriceRange
+     * @param float $min
+     * @param float $max
+     * @return Product[]
+     */
+    public function findByPriceRange(float $min, float $max): array
+    {
         $stmt = $this->pdo->prepare(
             "SELECT * FROM products WHERE price>=? AND price<=?"
         );
@@ -127,30 +167,48 @@ class ProductRepository implements RepositoryInterface
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    public function findPaginated(int $page, int $perPage = 10): array {
-        $page=max(1, $page);
-        $perPage=max(1, $perPage);
+    /**
+     * Summary of findPaginated
+     * @param int $page
+     * @param int $perPage
+     * @return Product[]
+     */
+    public function findPaginated(int $page, int $perPage = 10): array
+    {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
-        
+
         $stmt = $this->pdo->prepare(
             "SELECT * FROM products LIMIT :limit OFFSET :offset"
         );
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        
+
+        if ($stmt === false){
+            throw new RuntimeException('Query failed');
+        }
         return array_map([$this, 'hydrate'], $stmt->fetchAll());
     }
-    
-    public function count(): int {
-        $stmt= $this->pdo->query('SELECT COUNT(id) FROM products');
+
+    public function count(): int
+    {
+        $stmt = $this->pdo->query('SELECT COUNT(id) FROM products');
         return (int) $stmt->fetchColumn();
     }
-    
-    public function getPaginationData(int $page, int $perPage = 10): array {
+
+    /**
+     * Summary of getPaginationData
+     * @param int $page
+     * @param int $perPage
+     * @return array{currentPage: int, hasNext: bool, hasPrevious: bool, perPage: int, total: int, totalPages: int}
+     */
+    public function getPaginationData(int $page, int $perPage = 10): array
+    {
         $total = $this->count();
-        $page=max(1, $page);
-        $perPage=max(1, $perPage);
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
         return [
             'currentPage' => $page,
             'perPage' => $perPage,
@@ -161,17 +219,33 @@ class ProductRepository implements RepositoryInterface
         ];
     }
 
+    /**
+     * Summary of findPaginatedFiltered
+     * @param int $page
+     * @param int $perPage
+     * @param array{
+     *  nameSearch: string,
+     *  categories: int[],
+     *  priceMin: string,
+     *  priceMax: string,
+     *  inStock: bool,
+     *  sort: string
+     *} $filters
+     * @return Product[]
+     */
+
+    
     public function findPaginatedFiltered(int $page, int $perPage = 10, array $filters = []): array
-{
-    $page = max(1, $page);
-    $perPage = max(1, $perPage);
-    $offset = ($page - 1) * $perPage;
+    {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $offset = ($page - 1) * $perPage;
 
-    [$whereSql, $params, $needsCategoryJoin] = $this->buildFiltersWhere($filters);
+        [$whereSql, $params, $needsCategoryJoin] = $this->buildFiltersWhere($filters);
 
-    $orderBy = $this->buildOrderBy($filters['sort'] ?? 'az');
+        $orderBy = $this->buildOrderBy($filters['sort'] ?? 'az');
 
-    $sql = "
+        $sql = "
         SELECT p.*
         FROM products p
         " . ($needsCategoryJoin ? "JOIN category c ON c.id = p.category" : "") . "
@@ -180,51 +254,77 @@ class ProductRepository implements RepositoryInterface
         LIMIT :limit OFFSET :offset
     ";
 
-    $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
-    // bind filter params
-    foreach ($params as $key => $value) {
-        // ints/bools usually safe as int, others as string
-        if (is_int($value)) {
-            $stmt->bindValue($key, $value, PDO::PARAM_INT);
-        } else {
-            $stmt->bindValue($key, $value);
+        // bind filter params
+        foreach ($params as $key => $value) {
+            // ints/bools usually safe as int, others as string
+            if (is_int($value)) {
+                $stmt->bindValue($key, $value, PDO::PARAM_INT);
+            } else {
+                $stmt->bindValue($key, $value);
+            }
         }
+
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return array_map([$this, 'hydrate'], $stmt->fetchAll());
     }
 
-    $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    /**
+     * Summary of countFiltered
+     * @param array{
+     *  nameSearch: string,
+     *  categories: int[],
+     *  priceMin: string,
+     *  priceMax: string,
+     *  inStock: bool,
+     *  sort: string
+     *} $filters
+     * @return int
+     */
+    public function countFiltered(array $filters = []): int
+    {
+        [$whereSql, $params, $needsCategoryJoin] = $this->buildFiltersWhere($filters);
 
-    $stmt->execute();
-
-    return array_map([$this, 'hydrate'], $stmt->fetchAll());
-}
-
-public function countFiltered(array $filters = []): int
-{
-    [$whereSql, $params, $needsCategoryJoin] = $this->buildFiltersWhere($filters);
-
-    $sql = "
+        $sql = "
         SELECT COUNT(*)
         FROM products p
         " . ($needsCategoryJoin ? "JOIN category c ON c.id = p.category" : "") . "
         $whereSql
     ";
 
-    $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql);
 
-    foreach ($params as $key => $value) {
-        if (is_int($value)) {
-            $stmt->bindValue($key, $value, PDO::PARAM_INT);
-        } else {
-            $stmt->bindValue($key, $value);
+        foreach ($params as $key => $value) {
+            if (is_int($value)) {
+                $stmt->bindValue($key, $value, PDO::PARAM_INT);
+            } else {
+                $stmt->bindValue($key, $value);
+            }
         }
+
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
     }
 
-    $stmt->execute();
-    return (int) $stmt->fetchColumn();
-}
-
+    /**
+     * Summary of getPaginationDataFiltered
+     * @param int $page
+     * @param int $perPage
+     * @param array{
+     *  nameSearch: string,
+     *  categories: int[],
+     *  priceMin: string,
+     *  priceMax: string,
+     *  inStock: bool,
+     *  sort: string
+     *} $filters
+     * @return array{currentPage: int, hasNext: bool, hasPrevious: bool, perPage: int, total: int, totalPages: int}
+     */
     public function getPaginationDataFiltered(int $page, int $perPage = 10, array $filters = []): array
     {
         $page = max(1, $page);
@@ -245,6 +345,21 @@ public function countFiltered(array $filters = []): int
 
     /**
      * Returns: [whereSql, params, needsCategoryJoin]
+     */
+    /**
+     * Summary of buildFiltersWhere
+     * @param array{
+     *  nameSearch: string,
+     *  categories: int[],
+     *  priceMin: string,
+     *  priceMax: string,
+     *  inStock: bool,
+     *  sort: string
+     *} $filters
+     * @return array{
+     * 0: string, 
+     * 1: array<string, int|float|string>, 
+     * 2: bool}
      */
     private function buildFiltersWhere(array $filters): array
     {
@@ -287,13 +402,11 @@ public function countFiltered(array $filters = []): int
                 $params[$ph] = (string) $catName;
             }
 
-            if (!empty($in)) {
-                $where[] = 'c.name IN (' . implode(',', $in) . ')';
-            }
+            $where[] = 'c.name IN (' . implode(',', $in) . ')';
         }
 
         $whereSql = '';
-        if (!empty($where)) {
+        if ($where !== []) {
             $whereSql = 'WHERE ' . implode(' AND ', $where);
         }
 

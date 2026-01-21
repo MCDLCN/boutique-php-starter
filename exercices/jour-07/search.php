@@ -12,11 +12,11 @@ try {
 }
 
 if (isset($_GET['search'])) {
-	$search = $_GET['search'];	
-	$query = "SELECT * FROM products WHERE name LIKE :search";
-	$stmt = $pdo->prepare($query);
-	$stmt->execute(['search' => '%' . $search . '%']);
-	$products = $stmt->fetchAll();
+    $search = $_GET['search'];
+    $query = "SELECT * FROM products WHERE name LIKE :search";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(['search' => '%' . $search . '%']);
+    $products = $stmt->fetchAll();
 }
 
 ?>
@@ -33,12 +33,12 @@ if (isset($_GET['search'])) {
 	<th>Name</th>
 	<th>Price</th>
 </tr>
-<?php foreach ($products as $product) { 
-	echo '<tr>';
-		echo '<td>' . $product['id'] . '</td>';
-		echo '<td>' . $product['name'] . '</td>';
-		echo '<td>' . $product['price'] . '$</td>';
-	echo '</tr>';
+<?php foreach ($products as $product) {
+    echo '<tr>';
+    echo '<td>' . $product['id'] . '</td>';
+    echo '<td>' . $product['name'] . '</td>';
+    echo '<td>' . $product['price'] . '$</td>';
+    echo '</tr>';
 } ?>
 </table>
 <?php } ?>

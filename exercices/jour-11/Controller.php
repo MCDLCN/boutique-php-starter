@@ -1,4 +1,5 @@
 <?php
+
 class ProductController
 {
     private ProductRepository $repository;
@@ -20,14 +21,14 @@ class ProductController
     public function show(): void
     {
         $id = $_GET['id'] ?? null;
-        
+
         if (!$id) {
             $this->redirect('/produits');
             return;
         }
 
         $product = $this->repository->find((int) $id);
-        
+
         if (!$product) {
             http_response_code(404);
             require __DIR__ . '/../views/errors/404.php';

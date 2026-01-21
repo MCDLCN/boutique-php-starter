@@ -1,4 +1,5 @@
 <?php
+
 $prix = [10, 20, 30];
 
 // SANS référence : $p est une copie, le tableau n'est pas modifié
@@ -16,8 +17,8 @@ foreach ($prix as $p) {
 // Attention au unset() après la boucle !
 
 foreach ($prix as &$p) {
-    $p =round($p * 0.85, 2); // Modifie directement le tableau
+    $p = round($p * 0.85, 2); // Modifie directement le tableau
 }
-unset($p); 
+unset($p);
 
 var_dump($prix);

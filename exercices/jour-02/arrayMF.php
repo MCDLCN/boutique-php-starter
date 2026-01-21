@@ -1,15 +1,16 @@
 <?php
+
 $prixHT = [10, 20, 30];
 
 // Transformer : tous les prix en TTC
-$prixTTC = array_map(fn($p) => $p * 1.2, $prixHT);
+$prixTTC = array_map(fn ($p) => $p * 1.2, $prixHT);
 // Résultat : [12, 24, 36]
 
 // Filtrer : garder seulement les prix > 15
-$chers = array_filter($prixHT, fn($p) => $p > 15);
+$chers = array_filter($prixHT, fn ($p) => $p > 15);
 // Résultat : [20, 30]
 
-// À toi : 
+// À toi :
 // 1. Extrais tous les noms de produits de ton tableau
 // 2. Filtre les produits avec stock > 0
 

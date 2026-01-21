@@ -1,22 +1,27 @@
 <?php
-class Product {
+
+class Product
+{
     public function __construct(
         private int $id,
         public string $name,
         public float $price
-    ) {}
-
-    public function __clone(): void {
-        $this->name = 'Clone of ' . $this->name;
-        $this->id = 100+$this->id;
+    ) {
     }
 
-    public function duplicate(): Product {
-        return clone $this;   
+    public function __clone(): void
+    {
+        $this->name = 'Clone of ' . $this->name;
+        $this->id = 100 + $this->id;
+    }
+
+    public function duplicate(): Product
+    {
+        return clone $this;
     }
 }
 
-$original = new Product(1,'T-shirt', 29.99);
+$original = new Product(1, 'T-shirt', 29.99);
 
 // ⚠️ ATTENTION : ce n'est PAS une copie !
 $reference = $original;

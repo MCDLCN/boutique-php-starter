@@ -1,6 +1,6 @@
-<?php 
+<?php
 $names = ["Julie", "Kelsie", "Justin", "Dominique","Tifanny"];
-$counter=1;
+$counter = 1;
 ?>
 <!DOCTYPE html>
 <html>
@@ -12,8 +12,8 @@ $counter=1;
 <body>
 <ul>
 <?php foreach ($names as $name) {
-	echo '<li>'.$counter.'. '.$name.'</li>';
-	$counter++;
+    echo '<li>'.$counter.'. '.$name.'</li>';
+    $counter++;
 }
 ?>
 </ul>

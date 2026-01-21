@@ -12,7 +12,7 @@ $stock = 8;
 <body>
     <h1><?= $name; ?></h1>
     <p><?= $price.'$';?></p>
-    <?php if ($stock>0):?> 
+    <?php if ($stock > 0):?> 
 	<span>Available</span>
     <?php else: ?> 
 	<span>Not available</span>

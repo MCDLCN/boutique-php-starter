@@ -98,7 +98,7 @@
                         foreach ((array)($_GET['categories'] ?? []) as $c) {
                             echo '<input type="hidden" name="categories[]" value="' . e((string)$c) . '">';
                         }
-                        ?>
+            ?>
                         <input type="hidden" name="nameSearch" value="<?= e((string)($filters['nameSearch'])) ?>">
                         <input type="hidden" name="price_min" value="<?= e((string)($_GET['price_min'] ?? '')) ?>">
                         <input type="hidden" name="price_max" value="<?= e((string)($_GET['price_max'] ?? '')) ?>">

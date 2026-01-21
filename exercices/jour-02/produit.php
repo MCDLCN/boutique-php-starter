@@ -1,6 +1,6 @@
 <?php
 $product = [
-		"name" => "T-shirt",
+        "name" => "T-shirt",
         "description" => "This is a shirt",
         "price" => 29.99,
         "stock" => 50,
@@ -17,7 +17,7 @@ $product = [
 <br>
 <p>Description: <?= $product["description"]?></p>
 <br>
-<p>Price: <?= round($product["price"]*0.9, 2)?>$</p>
+<p>Price: <?= round($product["price"] * 0.9, 2)?>$</p>
 <br>
 <p>There is <?= $product["stock"]?> in stock</p>
 <br>

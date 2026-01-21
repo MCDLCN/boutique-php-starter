@@ -19,7 +19,7 @@ $product = [
 <p>Image: <img src="<?= $product["images"][1] ?>" alt="<?= htmlspecialchars($product["name"]) ?>"></p>
 <br>
 <p>Sizes: <?php foreach ($product["sizes"] as $key) {
-	echo $key.', ';
+    echo $key.', ';
 }?></p>
 <br>
 <p>Rating 1st: <?php echo $product["reviews"][0]["rating"];?></p>

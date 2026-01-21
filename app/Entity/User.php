@@ -1,56 +1,81 @@
 <?php
-namespace App\Entity;
-class User{
 
+namespace App\Entity;
+
+class User
+{
+    /**
+     * Summary of __construct
+     * @param mixed $id
+     * @param string $name
+     * @param string $email
+     * @param string $registrationDate
+     * @param Address[] $Addresses
+     */
     public function __construct(
         private ?int $id,
         private string $name,
         private string $email,
-        private string $dateInscription,
+        private string $registrationDate,
         private array $Addresses = []
-    ){}
-        public function addAddress(Address $address){
-            $this->Addresses[$address->getId()] = $address;
-        }
+    ) {
+    }
+    public function addAddress(Address $address): void
+    {
+        $this->Addresses[$address->getId()] = $address;
+    }
 
-        public function getAddresses(): array{
-            return $this->Addresses;
-        }
+    /**
+     * Summary of getAddresses
+     * @return Address[]
+     */
+    public function getAddresses(): array
+    {
+        return $this->Addresses;
+    }
 
-        public function getDefaultAddress(): ?Address{
-            foreach($this->Addresses as $address){
-                if($address->isDefault()){
-                    return $address;
-                }
+    public function getDefaultAddress(): ?Address
+    {
+        foreach ($this->Addresses as $address) {
+            if ($address->isDefault()) {
+                return $address;
             }
-            return null;
         }
+        return null;
+    }
 
-        public function getName(): string{
-            return $this->name;
-        }
+    public function getName(): string
+    {
+        return $this->name;
+    }
 
-        public function getEmail(): string{
-            return $this->email;
-        }
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
 
-        public function getDateInscription(): string{
-            return $this->dateInscription;
-        }
+    public function getRegistrationDate(): string
+    {
+        return $this->registrationDate;
+    }
 
-        public function removeAddress(int $id){
-            unset($this->Addresses[$id]);
-        }
+    public function removeAddress(int $id): void
+    {
+        unset($this->Addresses[$id]);
+    }
 
-        public function clearAddresses(): void{
-            $this->Addresses = [];
-        }
+    public function clearAddresses(): void
+    {
+        $this->Addresses = [];
+    }
 
-        public function setId(int $id): void{
-            $this->id = $id;
-        }
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
 
-        public function getId(): int{
-            return $this->id;
-        }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 }

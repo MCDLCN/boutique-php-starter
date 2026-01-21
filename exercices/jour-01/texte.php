@@ -1,4 +1,5 @@
 <?php
+
 $brand = "Nike";
 $model = "Air Max";
 
@@ -6,7 +7,7 @@ echo "$brand $model";
 echo "<br />";
 echo $brand.' '.$model;
 echo "<br />";
-$brandModel= '%s %s';
+$brandModel = '%s %s';
 echo sprintf($brandModel, $brand, $model);
 $price = 99.99;
 echo "<br />";

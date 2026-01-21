@@ -1,4 +1,5 @@
 <?php
+
 class Router
 {
     private array $routes = [];
@@ -17,7 +18,7 @@ class Router
     {
         // Nettoyer l'URI (enlever les query strings)
         $path = parse_url($uri, PHP_URL_PATH);
-        
+
         if (isset($this->routes[$method][$path])) {
             [$controller, $action] = $this->routes[$method][$path];
             $controllerInstance = new $controller();

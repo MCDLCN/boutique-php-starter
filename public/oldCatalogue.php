@@ -6,9 +6,11 @@ $inStock = 0;
 $onSale = 0;
 $outOfStock = 0;
 
-foreach ($products as $product){
-    $product["stock"]>0 ? $inStock++ : $outOfStock++;
-    if ($product["discount"]>0)  $onSale++;
+foreach ($products as $product) {
+    $product["stock"] > 0 ? $inStock++ : $outOfStock++;
+    if ($product["discount"] > 0) {
+        $onSale++;
+    }
 }
 
 ?>
@@ -30,20 +32,22 @@ foreach ($products as $product){
             <div class="product">
                 <p>Image: <img src="<?= $product["image"] ?>" alt="<?= htmlspecialchars($product["name"]) ?>"></p>
                 <p><?= $product["name"];?></p>
-                <p><?= isOnSale($product["discount"]) ? formatPrice(calculateDiscounted($product["price"],$product["discount"])) : formatPrice($product["price"]); ?></p>
-                <?php if (isNew($product['dateAdded'])){
-                echo '<span class="badge badge-pill bg-primary"> New </span>';}
+                <p><?= isOnSale($product["discount"]) ? formatPrice(calculateDiscounted($product["price"], $product["discount"])) : formatPrice($product["price"]); ?></p>
+                <?php if (isNew($product['dateAdded'])) {
+                    echo '<span class="badge badge-pill bg-primary"> New </span>';
+                }
 
-                if (isOnSale($product["discount"])){
-                echo displayBadge("on sale!", "pink");}
+            if (isOnSale($product["discount"])) {
+                echo displayBadge("on sale!", "pink");
+            }
 
-                [$text, $colour] = displayStock($product["stock"]);
-                echo displayBadge($text, $colour);
+            [$text, $colour] = displayStock($product["stock"]);
+            echo displayBadge($text, $colour);
 
-                echo '<br>';
+            echo '<br>';
 
-                echo $product["stock"]>0 ? ' <button type="button">Buy!</button> ' : ' <button type="button" disabled>Buy!</button> ';
-                ?>
+            echo $product["stock"] > 0 ? ' <button type="button">Buy!</button> ' : ' <button type="button" disabled>Buy!</button> ';
+            ?>
             </div>
         <?php endforeach; ?>
     </div>

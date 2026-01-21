@@ -6,18 +6,18 @@ require_once __DIR__ . '/../../app/data.php';
 $price = formatPrice(1234.5);
 
 foreach ($products as $product) {
-	echo $product['name'];
-	echo '<br>';
-	var_dump(isInStock($product['stock']));
-	echo '<br>';
-	var_dump(isOnsAle($product['discount']));
-	echo '<br>';
-	var_dump(isNew($product['dateAdded']));
-	echo '<br>';
-	var_dump(canOrder($product['stock'], 1));
-	echo '<br>';
-	var_dump(canOrder($product['stock'], 100));
-	echo '<br>';
+    echo $product['name'];
+    echo '<br>';
+    var_dump(isInStock($product['stock']));
+    echo '<br>';
+    var_dump(isOnsAle($product['discount']));
+    echo '<br>';
+    var_dump(isNew($product['dateAdded']));
+    echo '<br>';
+    var_dump(canOrder($product['stock'], 1));
+    echo '<br>';
+    var_dump(canOrder($product['stock'], 100));
+    echo '<br>';
 }
 ?>
 <!DOCTYPE html>
@@ -31,7 +31,7 @@ foreach ($products as $product) {
 <?php foreach ($products as $product): ?>
 	<p><?= $product['name'];?><p> 
 	<p><?= displayBadge($product['stock'], displayStock($product['stock']));?></p> 
-	<p><?= displayPrice($product['price'],$product['discount']);?></p>
+	<p><?= displayPrice($product['price'], $product['discount']);?></p>
 	<br>
 <?php endforeach; ?>
 </body>

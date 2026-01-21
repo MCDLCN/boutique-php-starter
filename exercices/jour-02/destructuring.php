@@ -1,4 +1,5 @@
 <?php
+
 $product = ['T-shirt', 29.99, 50];
 
 // Au lieu de :

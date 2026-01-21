@@ -1,4 +1,5 @@
 <?php
+
 $i = 0;
 
 // while classique : vérifie AVANT

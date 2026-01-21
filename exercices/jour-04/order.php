@@ -1,5 +1,5 @@
 <?php
-$possibleStatus=["standby","validated","shipped","delivered","canceled"];
+$possibleStatus = ["standby","validated","shipped","delivered","canceled"];
 ?>
 <!DOCTYPE html>
 <html>
@@ -10,40 +10,41 @@ $possibleStatus=["standby","validated","shipped","delivered","canceled"];
 </head>
 <body>
 	<?php foreach ($possibleStatus as $status) {
-		switch ($status) {
-			case 'standby':
-				echo '<span style="color: orange">Order in standby</span>';
-				break;
-			case 'validated':
-				echo '<span style="color: green">Order validated</span>';
-				break;
-			case 'shipped':
-				echo '<span style="color: blue">Order is being shipped</span>';
-				break;
-			case 'delivered':
-				echo '<span style="color: pink">You should have received the order</span>';
-				break;
-			case 'canceled':
-				echo '<span style="color: red">Order canceled</span>';
-				break;
-			
-			default:
-				break;
-		}
-		echo '<br>';
+	    switch ($status) {
+	        case 'standby':
+	            echo '<span style="color: orange">Order in standby</span>';
+	            break;
+	        case 'validated':
+	            echo '<span style="color: green">Order validated</span>';
+	            break;
+	        case 'shipped':
+	            echo '<span style="color: blue">Order is being shipped</span>';
+	            break;
+	        case 'delivered':
+	            echo '<span style="color: pink">You should have received the order</span>';
+	            break;
+	        case 'canceled':
+	            echo '<span style="color: red">Order canceled</span>';
+	            break;
+
+	        default:
+	            break;
+	    }
+	    echo '<br>';
 	}
 ?>
 <br>
 	<?php foreach ($possibleStatus as $status) {
-		$val = match ($status) {
-			'standby' => '<span style="color: orange">Order in standby</span>',
-			'validated' => '<span style="color: green">Order validated</span>',
-			'shipped' => '<span style="color: blue">Order is being shipped</span>',
-			'delivered' => '<span style="color: pink">You should have received the order</span>',
-			'canceled' => '<span style="color: red">Order canceled</span>',
-			default => null,
-		};
-		echo $val.'<br>';}
-	?>
+	    $val = match ($status) {
+	        'standby' => '<span style="color: orange">Order in standby</span>',
+	        'validated' => '<span style="color: green">Order validated</span>',
+	        'shipped' => '<span style="color: blue">Order is being shipped</span>',
+	        'delivered' => '<span style="color: pink">You should have received the order</span>',
+	        'canceled' => '<span style="color: red">Order canceled</span>',
+	        default => null,
+	    };
+	    echo $val.'<br>';
+	}
+?>
 </body>
 </html>

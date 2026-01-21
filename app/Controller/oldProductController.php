@@ -1,10 +1,11 @@
 <?php
+
 //namespace App\Controller;
 
-use App\Repository\ProductRepository;
-use App\Repository\CategoryRepository;
-use App\Entity\Cart;
 use App\Database;
+use App\Entity\Cart;
+use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
 
 class ProductController
 {
@@ -20,7 +21,9 @@ class ProductController
     // GET /produits
     public function index(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
 
         $pdo = Database::getInstance();
         $categoryRepo = new CategoryRepository($pdo);
@@ -36,7 +39,9 @@ class ProductController
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $perPage = isset($_GET['perPage']) ? (int)$_GET['perPage'] : 10;
         $allowedPerPage = [10, 15, 20, 25];
-        if (!in_array($perPage, $allowedPerPage, true)) $perPage = 10;
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
 
         $filters = [
             'nameSearch' => (string)($_GET['nameSearch'] ?? ''),
@@ -92,20 +97,20 @@ class ProductController
     public function show(array $params): void
     {
         $id = (int)$params['id'];
-        if (!$id) {
+        if ($id === 0) {
             $this->redirect('/products');
             return;
         }
 
         $product = $this->repository->find((int) $id);
-        
-        if (!$product) {
+
+        if (!$product instanceof \App\Entity\Product) {
             http_response_code(404);
             require __DIR__ . '/../../views/errors/404.php';
             return;
         }
         $currentlyHere = '';
-        view('products/show',['product'=>$product,'currentlyHere'=>'']);
+        view('products/show', ['product' => $product,'currentlyHere' => '']);
     }
 
     protected function redirect(string $url): void

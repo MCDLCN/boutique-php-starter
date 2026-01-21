@@ -13,7 +13,7 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         echo 'Invalid username or password';
     }
 } else {
-    echo 'Please enter a username and/or a password';   
+    echo 'Please enter a username and/or a password';
 }
 
 ?>

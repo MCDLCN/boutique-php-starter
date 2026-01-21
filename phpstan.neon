@@ -1,4 +1,12 @@
+# phpstan.neon
+includes:
+	- vendor/phpstan/phpstan/conf/bleedingEdge.neon
 parameters:
-    level: 5
+    level: 8
     paths:
         - app
+
+    #checkMissingIterableValueType: true
+    #checkGenericClassInNonGenericObjectType: true
+    #checkUninitializedProperties: true
+    #checkDynamicProperties: true

@@ -1,4 +1,5 @@
 <?php
+
 $telephone = $_POST['telephone'];
 
 // Téléphone français : 10 chiffres commençant par 0

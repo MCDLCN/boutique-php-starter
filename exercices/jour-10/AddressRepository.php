@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 final class AddressRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     public function find(int $id): ?Address
     {

@@ -1,7 +1,14 @@
 <?php
-class Product {
-    public function __construct(private ?string $category) {}
-    public function getCategory() { return $this->category; }
+
+class Product
+{
+    public function __construct(private ?string $category)
+    {
+    }
+    public function getCategory()
+    {
+        return $this->category;
+    }
 }
 
 $product = new Product("clothes");

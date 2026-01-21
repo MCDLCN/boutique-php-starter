@@ -1,26 +1,32 @@
 <?php
 
-class CartItem {
+class CartItem
+{
     public function __construct(
         public Product $item,
         public int $quantity = 1
-    ) {}
+    ) {
+    }
 
-    public function setQuantity(int $q): void {
+    public function setQuantity(int $q): void
+    {
         $this->quantity = max(1, $q);
     }
 
-    public function getTotal(): float {
+    public function getTotal(): float
+    {
         return $this->item->getPrice() * $this->quantity;
     }
 }
 
-class Cart {
+class Cart
+{
     /** @var array<int, CartItem> */
     private array $items = [];
     public function __construct()
-    {}
-     public function add(Product $product, int $quantity = 1): self
+    {
+    }
+    public function add(Product $product, int $quantity = 1): self
     {
         $id = $product->getId();
 
@@ -40,12 +46,16 @@ class Cart {
         return $this;
     }
 
-    public function update(int $itemId, int $quantity): void {
-        if (!isset($this->items[$itemId])) return;
+    public function update(int $itemId, int $quantity): void
+    {
+        if (!isset($this->items[$itemId])) {
+            return;
+        }
         $this->items[$itemId]->setQuantity($quantity);
     }
 
-    public function getTotal(): float {
+    public function getTotal(): float
+    {
         $total = 0.0;
         foreach ($this->items as $cartItem) {
             $total += $cartItem->getTotal();
@@ -53,7 +63,8 @@ class Cart {
         return $total;
     }
 
-    public function count(): int {
+    public function count(): int
+    {
         return count($this->items); // unique items
     }
 
@@ -63,13 +74,15 @@ class Cart {
         return $this;
     }
 
-    public function getItems(): array {
+    public function getItems(): array
+    {
         return $this->items;
     }
 
-    public function getTotalAllItems(): int {
-        $total=0;
-        foreach ($this->items as $item){
+    public function getTotalAllItems(): int
+    {
+        $total = 0;
+        foreach ($this->items as $item) {
             $total += $item->quantity;
         }
         return $total;

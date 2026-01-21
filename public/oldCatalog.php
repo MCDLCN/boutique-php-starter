@@ -11,7 +11,7 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
-        $e->getMessage();
+    $e->getMessage();
 }
 
 session_start();
@@ -25,7 +25,9 @@ $outOfStock = 0;
 
 foreach ($products as $product) {
     $product['stock'] > 0 ? $inStock++ : $outOfStock++;
-    if ($product['discount'] > 0) $onSale++;
+    if ($product['discount'] > 0) {
+        $onSale++;
+    }
 }
 
 $categoryCounts = [];
@@ -35,20 +37,20 @@ foreach ($products as $product) {
     $categoryCounts[$category] = ($categoryCounts[$category] ?? 0) + 1;
 }
 
-$categoriesSide = array_values(array_unique(array_map(fn($p) => $p['category'], $products)));
+$categoriesSide = array_values(array_unique(array_map(fn ($p) => $p['category'], $products)));
 $selectedCategories = $_GET['categories'] ?? [];
 $nameSearch = $_GET['nameSearch'] ?? '';
 $maxPrice = $_GET['price_max'] ?? '';
 $minPrice = $_GET['price_min'] ?? '';
 $inStockOnly = isset($_GET['in_stock']);
 $categoriesSelected = $_GET['categories'] ?? [];
-$countTotal=0;
+$countTotal = 0;
 
 if (!isset($_SESSION["totalCart"])) {
     $_SESSION["totalCart"] = 0;
 }
 
-if (isset($_SESSION['flash'])){
+if (isset($_SESSION['flash'])) {
     echo '<script>alert ("'.$_SESSION['flash'].'")</script>';
     unset($_SESSION['flash']);
 }
@@ -57,7 +59,7 @@ if (isset($_POST["idCart"])) {
     $id = $_POST["idCart"];
     $quantity = ($_POST["quantityAdd"] ?? 0);
     $currentQuantity = $_SESSION["cart"][$id] ?? 0;
-    if ($quantity + $currentQuantity <= $products[$_POST["idCart"]]["stock"]){   
+    if ($quantity + $currentQuantity <= $products[$_POST["idCart"]]["stock"]) {
         if (!isset($_SESSION["cart"][$id])) {
             $_SESSION["cart"][$id] = intval($quantity);
             echo "<script>alert ('Added to cart')</script>";
@@ -65,8 +67,8 @@ if (isset($_POST["idCart"])) {
             $_SESSION["cart"][$id] = $_SESSION["cart"][$id] + $quantity;
             echo "<script>alert ('Added to cart')</script>";
         }
-    }else {
-    echo "<script>alert ('Not enough stock')</script>";
+    } else {
+        echo "<script>alert ('Not enough stock')</script>";
     }
 }
 
@@ -76,9 +78,11 @@ if (!isset($_SESSION["totalItemsCart"])) {
 if (isset($_SESSION["cart"])) {
     $_SESSION["totalItemsCart"] = 0;
     foreach ($_SESSION["cart"] as $key => $value) {
-            $_SESSION["totalItemsCart"] += $value ;}
+        $_SESSION["totalItemsCart"] += $value ;
+    }
 } else {
-    $_SESSION["totalItemsCart"] = 0;}
+    $_SESSION["totalItemsCart"] = 0;
+}
 
 
 
@@ -160,7 +164,9 @@ if (isset($_SESSION["cart"])) {
                     <div class="catalog-sidebar__section">
                         <h3 class="catalog-sidebar__title">Availability</h3>
                         <label class="form-checkbox">
-                            <input type="checkbox" name="in_stock" value="1" <?php if(isset($_GET['in_stock'])) echo "checked='checked'"; ?>>
+                            <input type="checkbox" name="in_stock" value="1" <?php if (isset($_GET['in_stock'])) {
+                                echo "checked='checked'";
+                            } ?>>
                             <span>Only in stock</span>
                         </label>
                     </div>
@@ -192,23 +198,33 @@ if (isset($_SESSION["cart"])) {
                 <div class="products-grid">
 <?php foreach ($products as $product): ?>
     <?php
-        if ($nameSearch !== '' && stripos($product['name'], $nameSearch) === false) continue;
-        if ($maxPrice !== '' && $product['price'] > (float)$maxPrice) continue;
-        if ($minPrice !== '' && $product['price'] < (float)$minPrice) continue;
-        if ($inStockOnly && $product['stock'] <= 0) continue;
-        if (!empty($categoriesSelected) && !in_array($product['category'], $categoriesSelected)) continue;
+        if ($nameSearch !== '' && stripos($product['name'], $nameSearch) === false) {
+            continue;
+        }
+    if ($maxPrice !== '' && $product['price'] > (float)$maxPrice) {
+        continue;
+    }
+    if ($minPrice !== '' && $product['price'] < (float)$minPrice) {
+        continue;
+    }
+    if ($inStockOnly && $product['stock'] <= 0) {
+        continue;
+    }
+    if (!empty($categoriesSelected) && !in_array($product['category'], $categoriesSelected)) {
+        continue;
+    }
 
-        $id = $product['id'] ?? '';
-        $isSale = isOnSale($product['discount']);
-        $isNewProduct = isNew($product['dateAdded']);
-        $stock = (int)($product['stock'] ?? 0);
-        $name = $product['name'] ?? '';
-        $image = $product['image'] ?? '';
-        $price = $product['price'] ?? '';
-        $discount = $product['discount'] ?? '';
-        $description = $product['description'] ?? '';
-        $category = $product['category'] ?? '';
-        $countTotal++;
+    $id = $product['id'] ?? '';
+    $isSale = isOnSale($product['discount']);
+    $isNewProduct = isNew($product['dateAdded']);
+    $stock = (int)($product['stock'] ?? 0);
+    $name = $product['name'] ?? '';
+    $image = $product['image'] ?? '';
+    $price = $product['price'] ?? '';
+    $discount = $product['discount'] ?? '';
+    $description = $product['description'] ?? '';
+    $category = $product['category'] ?? '';
+    $countTotal++;
     ?>
     <article class="product-card">
         <div class="product-card__image-wrapper">

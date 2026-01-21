@@ -1,4 +1,5 @@
 <?php
+
 $fruits = ["Pomme", "Banane", "Orange"];
 
 echo $fruits[0]; // Pomme
@@ -11,4 +12,4 @@ echo '<br>';
 $colors = ["Rouge", "Vert", "Bleu"];
 
 // Ancienne syntaxe (tu la verras dans du vieux code)
-$colors = array("Rouge", "Vert", "Bleu");
+$colors = ["Rouge", "Vert", "Bleu"];

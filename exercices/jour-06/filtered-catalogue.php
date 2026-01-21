@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../app/data.php';
 require_once __DIR__ . '/../../app/helpers.php';
 
-$options = array_values(array_unique(array_map(fn($p) => $p['category'], $products)));
+$options = array_values(array_unique(array_map(fn ($p) => $p['category'], $products)));
 
 $name     = trim($_GET['name'] ?? '');
 $category = $_GET['category'] ?? '';
@@ -36,10 +36,18 @@ $inStock  = isset($_GET['inStock']);
 $results = [];
 
 foreach ($products as $product) {
-    if ($name !== '' && stripos($product['name'], $name) === false) continue;
-    if ($maxPrice !== '' && $product['price'] > (float)$maxPrice) continue;
-    if ($category !== '' && $product['category'] !== $category) continue;
-    if ($inStock && $product['stock'] <= 0) continue;
+    if ($name !== '' && stripos($product['name'], $name) === false) {
+        continue;
+    }
+    if ($maxPrice !== '' && $product['price'] > (float)$maxPrice) {
+        continue;
+    }
+    if ($category !== '' && $product['category'] !== $category) {
+        continue;
+    }
+    if ($inStock && $product['stock'] <= 0) {
+        continue;
+    }
 
     $results[] = $product['name'];
 }

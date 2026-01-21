@@ -14,8 +14,8 @@ rsort($price); // Tri décroissant
 // Exemple : trier des produits par price
 
 
-usort($price, function($a, $b) {
-    return $a<=> $b;
+usort($price, function ($a, $b) {
+    return $a <=> $b;
 
 });
 var_dump($price);

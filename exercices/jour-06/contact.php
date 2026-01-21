@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ .'/../../app/helpers.php';
 echo '<form method="POST" action="result.php">
     <input type="text" name="name">
@@ -16,30 +17,30 @@ $error = '';
 
 if (empty($email)) {
     $errors[] = "Email required";
-}elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-	$errors[] = "Invalid email";
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = "Invalid email";
 }
 
 
 
 if (empty($message)) {
-	$errors[] = "Message required";
+    $errors[] = "Message required";
 } elseif (strlen($message) < 10) {
-	$errors[] = "Message too short";
+    $errors[] = "Message too short";
 }
 
 if (empty($name)) {
-	$errors[] = "Name required";
+    $errors[] = "Name required";
 }
 
 
 
 foreach ($errors as $error) {
-	echo $error . '<br>';
+    echo $error . '<br>';
 }
 
 if (empty($errors)) {
-	echo e($name) . '<br>';
-	echo e($email) . '<br>';
-	echo e($message) . '<br>';
+    echo e($name) . '<br>';
+    echo e($email) . '<br>';
+    echo e($message) . '<br>';
 }

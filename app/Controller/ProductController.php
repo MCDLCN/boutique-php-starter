@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use App\Repository\ProductRepository;
-use App\Repository\CategoryRepository;
-use App\Entity\Cart;
 use App\Database;
+use App\Entity\Cart;
+use App\Repository\CategoryRepository;
+use App\Repository\ProductRepository;
 
 class ProductController extends Controller
 {
@@ -21,7 +21,7 @@ class ProductController extends Controller
 
     private function cart(): Cart
     {
-        /** @var mixed $cart */
+        /** @var Cart $cart */
         $cart = getCart();
 
         return $cart;
@@ -97,6 +97,9 @@ class ProductController extends Controller
     }
 
     // GET /produit/{id}
+    /**
+     * @param mixed[] $params
+     */
     public function show(array $params): void
     {
         $id = (int) ($params['id'] ?? 0);
@@ -106,7 +109,7 @@ class ProductController extends Controller
 
         $product = $this->repository->find($id);
 
-        if (!$product) {
+        if (!$product instanceof \App\Entity\Product) {
             http_response_code(404);
             $this->view('errors/404', [
                 'currentlyHere' => '',

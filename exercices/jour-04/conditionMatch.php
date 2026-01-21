@@ -1,4 +1,5 @@
 <?php
+
 $age = 25;
 
 // Au lieu de if/elseif/else :
@@ -17,7 +18,7 @@ $categorie = match(true) {
 $stocks = [0, 3, 15, 100];
 
 foreach ($stocks as $stock) {
-    $available = match(true){
+    $available = match(true) {
         $stock === 0 => 'out of stock',
         $stock < 5 => 'lasts',
         $stock < 20 => 'low stocks',
@@ -26,10 +27,10 @@ foreach ($stocks as $stock) {
     echo $available.'<br>';
 }
 
-usort($stocks, fn($b,$a)=> $a <=> $b);
+usort($stocks, fn ($b, $a) => $a <=> $b);
 
 foreach ($stocks as $stock) {
-    $available = match(true){
+    $available = match(true) {
         $stock === 0 => 'out of stock',
         $stock < 5 => 'lasts',
         $stock < 20 => 'low stocks',
