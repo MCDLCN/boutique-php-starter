@@ -1,9 +1,9 @@
 <?php
 
 //helpers.php
-function formatPrice(float $amount, string $currency = "€"): string
+function formatPrice(float $amount, string $currency = '€'): string
 {
-    return number_format($amount, 2, ",", " ").$currency;
+    return number_format($amount, 2, ',', ' ').$currency;
 }
 
 function isInStock(int $stock): bool
@@ -16,7 +16,7 @@ function isOnSale(int $discount): bool
 }
 function isNew(string $dateAdded): bool
 {
-    return strtotime($dateAdded) > strtotime("now - 30 day");
+    return strtotime($dateAdded) > strtotime('now - 30 day');
 }
 function canOrder(int $stock, int $quantity): bool
 {
@@ -34,11 +34,11 @@ function displayStock(int $quantity): string
 {
     $colour = '';
     if ($quantity > 10) {
-        $colour = "green";
+        $colour = 'green';
     } elseif ($quantity <= 10 && $quantity > 0) {
-        $colour = "orange";
+        $colour = 'orange';
     } else {
-        $colour = "red";
+        $colour = 'red';
     }
     //return '<span style="color:'.$colour.';"> There is '.$quantity.' left.';
     return $colour;

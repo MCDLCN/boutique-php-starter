@@ -9,7 +9,7 @@ class CategoryRepository
     public function find(int $id): ?Category
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name FROM categories WHERE id = ?"
+            'SELECT id, name FROM categories WHERE id = ?'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -20,7 +20,7 @@ class CategoryRepository
     public function findByName(string $name): ?Category
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name FROM categories WHERE name = ?"
+            'SELECT id, name FROM categories WHERE name = ?'
         );
         $stmt->execute([$name]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,7 +32,7 @@ class CategoryRepository
     public function findAll(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT id, name FROM categories ORDER BY name"
+            'SELECT id, name FROM categories ORDER BY name'
         );
 
         return array_map(
@@ -44,7 +44,7 @@ class CategoryRepository
     public function save(Category $category): void
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO categories (name) VALUES (?)"
+            'INSERT INTO categories (name) VALUES (?)'
         );
         $stmt->execute([$category->getName()]);
 
@@ -61,19 +61,19 @@ class CategoryRepository
 
     public function delete(Category $category): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM category WHERE id =?");
+        $stmt = $this->pdo->prepare('DELETE FROM category WHERE id =?');
         $stmt->execute($category->getId());
     }
 
     public function update(Category $category): void
     {
-        $stmt = $this->pdo->prepare("UPDATE category SET name = ? WHERE id = ?");
+        $stmt = $this->pdo->prepare('UPDATE category SET name = ? WHERE id = ?');
         $stmt->execute([$category->getName(), $category->getId()]);
     }
 
     public function findAllWithProducts(): array
     {
-        $sql = "
+        $sql = '
             SELECT
                 c.id   AS c_id,
                 c.name AS c_name,
@@ -88,7 +88,7 @@ class CategoryRepository
             FROM categories c
             LEFT JOIN products p ON p.category = c.id
             ORDER BY c.name, p.name
-        ";
+        ';
 
         $stmt = $this->pdo->query($sql);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -1,14 +1,14 @@
 <?php
 
-$cart = ["T-shirt", "Jean"];
+$cart = ['T-shirt', 'Jean'];
 
 // Ajouter à la fin
-$cart[] = "Casquette";
+$cart[] = 'Casquette';
 // ou
-array_push($cart, "Chaussettes");
+array_push($cart, 'Chaussettes');
 
 // Modifier
-$cart[0] = "Polo";
+$cart[0] = 'Polo';
 
 // Supprimer
 unset($cart[1]);

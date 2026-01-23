@@ -2,7 +2,7 @@
 
 function greet()
 {
-    echo "Welcome to the shop";
+    echo 'Welcome to the shop';
 };
 
 function greetClient(string $name)

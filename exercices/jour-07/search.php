@@ -1,19 +1,19 @@
 <?php
 try {
     $pdo = new PDO(
-        "mysql:host=localhost;dbname=boutique;charset=utf8mb4",
-        "dev",
-        "dev",
+        'mysql:host=localhost;dbname=boutique;charset=utf8mb4',
+        'dev',
+        'dev',
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
-    echo "✅ Succesful log in !";
+    echo '✅ Succesful log in !';
 } catch (PDOException $e) {
-    echo "❌ Error : " . $e->getMessage();
+    echo '❌ Error : ' . $e->getMessage();
 }
 
 if (isset($_GET['search'])) {
     $search = $_GET['search'];
-    $query = "SELECT * FROM products WHERE name LIKE :search";
+    $query = 'SELECT * FROM products WHERE name LIKE :search';
     $stmt = $pdo->prepare($query);
     $stmt->execute(['search' => '%' . $search . '%']);
     $products = $stmt->fetchAll();

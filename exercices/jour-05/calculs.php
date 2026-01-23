@@ -16,9 +16,9 @@ function calculateDiscount(float $price, float $percentage): float
 }
 
 $product = [
-    "priceExcludingTax" => 100,
-    "rate" => 20,
-    "discount" => 10
+    'priceExcludingTax' => 100,
+    'rate' => 20,
+    'discount' => 10
 ];
 
 echo $product['priceExcludingTax'];

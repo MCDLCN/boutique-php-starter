@@ -7,7 +7,7 @@ use App\Entity\Product;
 use PDO;
 use RuntimeException;
 
-require_once __DIR__ ."/RepositoryInterface.php";
+require_once __DIR__ .'/RepositoryInterface.php';
 class CategoryRepository implements RepositoryInterface
 {
     public function __construct(private PDO $pdo)
@@ -17,7 +17,7 @@ class CategoryRepository implements RepositoryInterface
     public function find(int $id): ?Category
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name FROM category WHERE id = ?"
+            'SELECT id, name FROM category WHERE id = ?'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -28,7 +28,7 @@ class CategoryRepository implements RepositoryInterface
     public function findByName(string $name): ?Category
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name FROM category WHERE name = ?"
+            'SELECT id, name FROM category WHERE name = ?'
         );
         $stmt->execute([$name]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -40,9 +40,9 @@ class CategoryRepository implements RepositoryInterface
     public function findAll(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT id, name FROM category ORDER BY name"
+            'SELECT id, name FROM category ORDER BY name'
         );
-        if ($stmt === false){
+        if ($stmt === false) {
             throw new RuntimeException('Query failed');
         }
         return array_map(
@@ -54,7 +54,7 @@ class CategoryRepository implements RepositoryInterface
     public function save(object $entity): void
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO category (name) VALUES (?)"
+            'INSERT INTO category (name) VALUES (?)'
         );
         $stmt->execute([$entity->getName()]);
 
@@ -64,7 +64,6 @@ class CategoryRepository implements RepositoryInterface
     /**
      * Summary of hydrate
      * @param mixed[] $row
-     * @return Category
      */
     private function hydrate(array $row): Category
     {
@@ -76,13 +75,13 @@ class CategoryRepository implements RepositoryInterface
 
     public function delete(int $id): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM category WHERE id =?");
+        $stmt = $this->pdo->prepare('DELETE FROM category WHERE id =?');
         $stmt->execute([$id]);
     }
 
     public function update(Category $category): void
     {
-        $stmt = $this->pdo->prepare("UPDATE category SET name = ? WHERE id = ?");
+        $stmt = $this->pdo->prepare('UPDATE category SET name = ? WHERE id = ?');
         $stmt->execute([$category->getName(), $category->getId()]);
     }
 
@@ -92,7 +91,7 @@ class CategoryRepository implements RepositoryInterface
      */
     public function findAllWithProducts(): array
     {
-        $sql = "
+        $sql = '
             SELECT
                 c.id   AS c_id,
                 c.name AS c_name,
@@ -107,10 +106,10 @@ class CategoryRepository implements RepositoryInterface
             FROM category c
             LEFT JOIN products p ON p.category = c.id
             ORDER BY c.name, p.name
-        ";
+        ';
 
         $stmt = $this->pdo->query($sql);
-        if ($stmt === false){
+        if ($stmt === false) {
             throw new RuntimeException('Query failed');
         }
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

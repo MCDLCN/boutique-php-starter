@@ -43,14 +43,13 @@ function formatPrice(float $amount): string
 function formatDate(string $date): string
 {
     $timestamp = strtotime($date);
-    if  ($timestamp=== false) {
+    if ($timestamp === false) {
         throw new RuntimeException('date is wrong');
     }
     return date('d F Y', $timestamp);
 }
 /**
  * Summary of displayStock
- * @param int $quantity
  * @return string[]
  */
 function displayStock(int $quantity): array
@@ -58,14 +57,14 @@ function displayStock(int $quantity): array
     $colour = '';
     $text = '';
     if ($quantity > 10) {
-        $colour = "green";
-        $text = "in stock";
+        $colour = 'green';
+        $text = 'in stock';
     } elseif ($quantity > 0) {
-        $colour = "orange";
-        $text = "few remaining";
+        $colour = 'orange';
+        $text = 'few remaining';
     } else {
-        $colour = "red";
-        $text = "out of stock";
+        $colour = 'red';
+        $text = 'out of stock';
     }
     //return '<span style="color:'.$colour.';"> There is '.$quantity.' left.';
     return [$text,$colour];
@@ -73,7 +72,7 @@ function displayStock(int $quantity): array
 
 function isNew(string $dateAdded): bool
 {
-    return strtotime($dateAdded) > strtotime("now - 30 day");
+    return strtotime($dateAdded) > strtotime('now - 30 day');
 }
 
 function isOnSale(int $discount): bool
@@ -93,7 +92,7 @@ function isOnSale(int $discount): bool
 
 function validateEmail(string $email): bool
 {
-    return filter_var($email, FILTER_VALIDATE_EMAIL)!== false;
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
 function validatePrice(mixed $price): bool
@@ -108,8 +107,8 @@ function dump_and_die(mixed ...$vars): void
         var_dump($var);
         $value = ob_get_clean();
 
-        if ($value === null) {
-            throw new RuntimeException("Nothing to capture");
+        if ($value === false) {
+            throw new RuntimeException('Nothing to capture');
         }
         echo '<pre style="background:#1e1e1e;color:#4ec9b0;padding:20px;border-radius:5px;">'
             . e($value) .
@@ -120,9 +119,7 @@ function dump_and_die(mixed ...$vars): void
 
 /**
  * Summary of view
- * @param string $template
  * @param array<string, mixed> $data
- * @return void
  */
 function view(string $template, array $data = []): void
 {

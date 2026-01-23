@@ -17,12 +17,18 @@
     },
     "scripts": {
         "lint": "vendor/bin/pint --test",
-        "fix": "vendor/bin/pint",
+        "fix": ["vendor/bin/pint", "vendor/bin/rector"],
         "analyse": "vendor/bin/phpstan analyse",
         "refactor": "vendor/bin/rector --dry-run",
         "quality": [
             "@lint",
             "@analyse"
-        ]
+        ],
+	"check": [ 
+		"@analyse",
+		"@lint"
+	],
+	"pre-commit": ["@check"]
+	
     }
 }

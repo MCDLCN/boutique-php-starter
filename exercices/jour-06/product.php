@@ -2,20 +2,20 @@
 
 $product = [
     1 => [
-    "name" => "T-Shirt",
-    "price" => 10
+    'name' => 'T-Shirt',
+    'price' => 10
     ],
     2 => [
-    "name" => "Jean",
-    "price" => 20
+    'name' => 'Jean',
+    'price' => 20
     ],
     3 => [
-    "name" => "amogus",
-    "price" => 100
+    'name' => 'amogus',
+    'price' => 100
     ],
     4 => [
-    "name" => "Cloud",
-    "price" => 50
+    'name' => 'Cloud',
+    'price' => 50
     ]
 ];
 

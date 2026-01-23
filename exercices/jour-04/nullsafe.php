@@ -11,7 +11,7 @@ class Product
     }
 }
 
-$product = new Product("clothes");
+$product = new Product('clothes');
 
 $category = $product?->getCategory();
 

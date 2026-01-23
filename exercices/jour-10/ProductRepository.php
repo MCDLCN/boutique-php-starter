@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ ."/../../app/entities/Product.php";
-require_once __DIR__ ."/../../app/entities/Category.php";
+require_once __DIR__ .'/../../app/entities/Product.php';
+require_once __DIR__ .'/../../app/entities/Category.php';
 class ProductRepository
 {
     public function __construct(
@@ -13,7 +13,7 @@ class ProductRepository
     // READ - Un seul
     public function find(int $id): ?Product
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = ?");
+        $stmt = $this->pdo->prepare('SELECT * FROM products WHERE id = ?');
         $stmt->execute([$id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -23,7 +23,7 @@ class ProductRepository
     // READ - Tous
     public function findAll(): array
     {
-        $stmt = $this->pdo->query("SELECT * FROM products");
+        $stmt = $this->pdo->query('SELECT * FROM products');
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
@@ -31,8 +31,8 @@ class ProductRepository
     public function save(Product $product): void
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            'INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $stmt->execute([
             $product->getName(),
@@ -51,7 +51,7 @@ class ProductRepository
     public function update(Product $product): void
     {
         $stmt = $this->pdo->prepare(
-            "UPDATE products SET name = ?, price = ?, stock = ? WHERE id = ?"
+            'UPDATE products SET name = ?, price = ?, stock = ? WHERE id = ?'
         );
         $stmt->execute([
             $product->getName(),
@@ -64,7 +64,7 @@ class ProductRepository
     // DELETE
     public function delete(int $id): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM products WHERE id = ?");
+        $stmt = $this->pdo->prepare('DELETE FROM products WHERE id = ?');
         $stmt->execute([$id]);
     }
 
@@ -89,7 +89,7 @@ class ProductRepository
     public function findByCategory(string $category): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products WHERE category = ?"
+            'SELECT * FROM products WHERE category = ?'
         );
         $stmt->execute([$category]);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -98,7 +98,7 @@ class ProductRepository
     public function findInStock(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT * FROM products WHERE stock > 0"
+            'SELECT * FROM products WHERE stock > 0'
         );
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
@@ -106,7 +106,7 @@ class ProductRepository
     public function search(string $term): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products WHERE name LIKE ?"
+            'SELECT * FROM products WHERE name LIKE ?'
         );
         $stmt->execute(['%' . $term . '%']);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -115,7 +115,7 @@ class ProductRepository
     public function findByPriceRange(float $min, float $max): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products WHERE price>=? AND price<=?"
+            'SELECT * FROM products WHERE price>=? AND price<=?'
         );
         $stmt->execute([$min, $max]);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -124,10 +124,10 @@ class ProductRepository
     public function findWithProduct(): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products GROUP BY category"
+            'SELECT * FROM products GROUP BY category'
         );
         $stmt->execute();
-        return array_map([$this,"hydrate"], $stmt->fetchAll(PDO::FETCH_ASSOC));
+        return array_map([$this,'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 }
 

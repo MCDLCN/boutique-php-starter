@@ -3,14 +3,14 @@
 session_start();
 try {
     $pdo = new PDO(
-        "mysql:host=localhost;dbname=boutique;charset=utf8mb4",
-        "dev",
-        "dev",
+        'mysql:host=localhost;dbname=boutique;charset=utf8mb4',
+        'dev',
+        'dev',
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
-    echo "✅ Succesful log in !";
+    echo '✅ Succesful log in !';
 } catch (PDOException $e) {
-    echo "❌ Error : " . $e->getMessage();
+    echo '❌ Error : ' . $e->getMessage();
 }
 echo '<br>';
 
@@ -26,7 +26,7 @@ if (isset($_POST['emptyCart'])) {
 }
 
 if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-    $products = $_SESSION["cart"];
+    $products = $_SESSION['cart'];
     $ids = array_keys($_SESSION['cart']);
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
     $stmt = $pdo->prepare(
@@ -38,10 +38,10 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 
 
     if (isset($_POST['idUpdate'])) {
-        $stmt = $pdo->prepare("SELECT stock FROM products WHERE id = ?");
+        $stmt = $pdo->prepare('SELECT stock FROM products WHERE id = ?');
         $stmt->execute([(int)$_POST['idUpdate']]);
         $stock = (int)$stmt->fetchColumn();
-        $quantity = ($_POST["quantity"] ?? 0);
+        $quantity = ($_POST['quantity'] ?? 0);
         $currentQuantity = $_SESSION['cart'][$_POST['idUpdate']];
         if ($quantity + $currentQuantity <= $stock) {
             $id = $_POST['idUpdate'];
@@ -55,13 +55,13 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
     //var_dump($productsInCart);
     echo '<br>';
     //var_dump($products);
-    if (!isset($_SESSION["totalItemsCart"])) {
-        $_SESSION["totalItemsCart"] = 0;
+    if (!isset($_SESSION['totalItemsCart'])) {
+        $_SESSION['totalItemsCart'] = 0;
     }
 
-    $_SESSION["totalItemsCart"] = 0;
-    foreach ($_SESSION["cart"] as $key => $value) {
-        $_SESSION["totalItemsCart"] += $value ;
+    $_SESSION['totalItemsCart'] = 0;
+    foreach ($_SESSION['cart'] as $key => $value) {
+        $_SESSION['totalItemsCart'] += $value ;
     }
 
 
@@ -70,7 +70,7 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
 
     //var_dump($products);
     echo '<br>';
-    echo 'There is '.$_SESSION["totalItemsCart"].' product(s) in your cart';
+    echo 'There is '.$_SESSION['totalItemsCart'].' product(s) in your cart';
     echo '<br>';
     echo '<table>';
     echo '<tr>';
@@ -85,11 +85,11 @@ if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
         echo '<td>' . $product['name'] . '</td>';
         echo '<td>' . $product['price'] . '$</td>';
         echo '<td><form method="POST">
-    <input type="hidden" name="idUpdate" value='. $product["id"].'>
+    <input type="hidden" name="idUpdate" value='. $product['id'].'>
     <input type="number" name="quantity" min="1" value="' . $products[$product['id']] . '">
     <input type="submit" value="update quantity"></form></td>';
         echo '<td>' . $product['price'] * $products[$product['id']] . '$</td>';
-        echo '<td><form method="POST"><input type="hidden" name="idRemove" value='. $product["id"].'><input type="submit" value="Remove"></form></td>';
+        echo '<td><form method="POST"><input type="hidden" name="idRemove" value='. $product['id'].'><input type="submit" value="Remove"></form></td>';
         $_SESSION['totalCart'] += $product['price'] * $products[$product['id']];
         echo '</tr>';
     }

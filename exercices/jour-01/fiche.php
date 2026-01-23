@@ -1,5 +1,5 @@
 <?php
-$name = "Amogus";
+$name = 'Amogus';
 $price = 100;
 $stock = 8;
 ?>

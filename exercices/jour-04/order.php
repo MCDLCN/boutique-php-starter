@@ -1,5 +1,5 @@
 <?php
-$possibleStatus = ["standby","validated","shipped","delivered","canceled"];
+$possibleStatus = ['standby','validated','shipped','delivered','canceled'];
 ?>
 <!DOCTYPE html>
 <html>

@@ -23,7 +23,7 @@ function displayBadge(string $text, string $colour): string
 }
 function formatPrice(float $amount): string
 {
-    return number_format($amount, 2, ",", " ").'$';
+    return number_format($amount, 2, ',', ' ').'$';
 }
 
 function formatDate(string $date): string
@@ -35,11 +35,11 @@ function displayStock(int $quantity): string
 {
     $colour = '';
     if ($quantity > 10) {
-        $colour = "green";
+        $colour = 'green';
     } elseif ($quantity <= 10 && $quantity > 0) {
-        $colour = "orange";
+        $colour = 'orange';
     } else {
-        $colour = "red";
+        $colour = 'red';
     }
     //return '<span style="color:'.$colour.';"> There is '.$quantity.' left.';
     return $colour;
@@ -47,7 +47,7 @@ function displayStock(int $quantity): string
 
 function isNew(string $dateAdded): bool
 {
-    return strtotime($dateAdded) > strtotime("now - 30 day");
+    return strtotime($dateAdded) > strtotime('now - 30 day');
 }
 
 function isOnSale(int $discount): bool
@@ -58,13 +58,13 @@ function isOnSale(int $discount): bool
 function displayAllBadges(array $product): string
 {
     $badges = '';
-    if (isNew($product["dateAdded"])) {
+    if (isNew($product['dateAdded'])) {
         $badges = $badges.'<span class="badge badge-pill bg-primary"> New </span>';
     }
-    if (isOnSale($product["discount"])) {
+    if (isOnSale($product['discount'])) {
         $badges = $badges.'<span class="badge badge-pill bg-primary"> On sale! </span>';
     }
-    $badges = $badges.displayBadge(" ", displayStock($product['stock']));
+    $badges = $badges.displayBadge(' ', displayStock($product['stock']));
     return $badges;
 }
 
@@ -109,11 +109,11 @@ function dump_and_die(mixed ...$vars): void
 }
 echo formatPrice(calculateTotal($products));
 echo '<br>';
-echo validateEmail("example@gmail.com");
+echo validateEmail('example@gmail.com');
 echo '<br>';
-echo validatePrice(-5) ? "true" : "false";
+echo validatePrice(-5) ? 'true' : 'false';
 echo '<br>';
-echo formatDate($products[0]["dateAdded"]);
+echo formatDate($products[0]['dateAdded']);
 echo '<br>';
 dump_and_die($products[0]);
 ?>

@@ -15,7 +15,7 @@ class bankAccount
     public function deposit(float $amount): void
     {
         if ($amount <= 0) {
-            throw new InvalidArgumentException("Invalid amount");
+            throw new InvalidArgumentException('Invalid amount');
         }
         $this->balance += $amount;
     }
@@ -23,10 +23,10 @@ class bankAccount
     public function withdraw(float $amount): void
     {
         if ($amount <= 0) {
-            throw new InvalidArgumentException("Invalid amount");
+            throw new InvalidArgumentException('Invalid amount');
         }
         if ($this->balance < $amount) {
-            throw new InvalidArgumentException("Not enough dineros");
+            throw new InvalidArgumentException('Not enough dineros');
         }
         $this->balance -= $amount;
     }

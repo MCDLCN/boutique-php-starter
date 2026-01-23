@@ -1,6 +1,6 @@
 <?php
-$name = "Amogus";
-$desc = "Dis amazing plushie";
+$name = 'Amogus';
+$desc = 'Dis amazing plushie';
 $price = 2057.6;
 $tax = 20;
 $quantity = 8;
@@ -25,6 +25,6 @@ $priceTaxedDiscounted = $priceTaxed - ($priceTaxed * ($discount / 100));
 	<br>
 	<span style="font-size:30px;">Only <?='<b>'.round($priceTaxed, 2).'</b>';?>$!!!</span>
 	<br>
-	<span style="font-size:10px;">Or <?='<b>'.number_format($priceTaxedDiscounted, 2, ",", " ").'</b>'?>$ with our amazing discount</span>
+	<span style="font-size:10px;">Or <?='<b>'.number_format($priceTaxedDiscounted, 2, ',', ' ').'</b>'?>$ with our amazing discount</span>
 </body>
 </html> 

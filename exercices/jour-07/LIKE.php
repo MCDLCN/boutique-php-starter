@@ -14,5 +14,5 @@ function escapeLike(string $str): string
 }
 
 $searchEscaped = escapeLike($search);
-$stmt = $pdo->prepare("SELECT * FROM produits WHERE nom LIKE ?");
+$stmt = $pdo->prepare('SELECT * FROM produits WHERE nom LIKE ?');
 $stmt->execute(['%' . $searchEscaped . '%']);

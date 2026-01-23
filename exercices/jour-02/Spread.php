@@ -11,8 +11,8 @@ $complet = [0, ...$base, 10]; // [0, 1, 2, 3, 10]
 
 // À toi : fusionne $nouveautes et $promos en un seul tableau $miseEnAvant
 
-$news = ["This", "is", "a", "dummy", "list"];
-$promos = ["wow", "only", "50%", "off"];
+$news = ['This', 'is', 'a', 'dummy', 'list'];
+$promos = ['wow', 'only', '50%', 'off'];
 
 $forward = [...$news, ...$promos];
 

@@ -1,9 +1,9 @@
 <?php
 $person = [
-    "name" => "Alice",
-    "age"  => 28,
-    "city" => "Paris",
-    "job"  => "Web Developer"
+    'name' => 'Alice',
+    'age'  => 28,
+    'city' => 'Paris',
+    'job'  => 'Web Developer'
 ];
 ?>
 <!DOCTYPE html>

@@ -1,5 +1,5 @@
 <?php
-$names = ["Julie", "Kelsie", "Justin", "Dominique","Tifanny"];
+$names = ['Julie', 'Kelsie', 'Justin', 'Dominique','Tifanny'];
 $counter = 1;
 ?>
 <!DOCTYPE html>

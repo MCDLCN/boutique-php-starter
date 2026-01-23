@@ -16,21 +16,21 @@ $errors = [];
 $error = '';
 
 if (empty($email)) {
-    $errors[] = "Email required";
+    $errors[] = 'Email required';
 } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $errors[] = "Invalid email";
+    $errors[] = 'Invalid email';
 }
 
 
 
 if (empty($message)) {
-    $errors[] = "Message required";
+    $errors[] = 'Message required';
 } elseif (strlen($message) < 10) {
-    $errors[] = "Message too short";
+    $errors[] = 'Message too short';
 }
 
 if (empty($name)) {
-    $errors[] = "Name required";
+    $errors[] = 'Name required';
 }
 
 

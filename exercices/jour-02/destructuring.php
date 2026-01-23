@@ -13,8 +13,8 @@ $stock = $product[2];
 // Avec un tableau associatif :
 $data = ['name' => 'Jean', 'price' => 79.99];
 // À toi de trouver la syntaxe pour extraire 'name' dans $n et 'price' dans $p
-$n = $data["name"];
+$n = $data['name'];
 echo $n;
 echo '<br>';
-$p = $data["price"];
+$p = $data['price'];
 echo $p;

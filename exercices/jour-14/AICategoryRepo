@@ -1,0 +1,85 @@
+<?php
+
+class CategoryRepository
+{
+    public function __construct(private PDO $pdo)
+    {
+    }
+
+    private function hydrate(array $data): Category
+    {
+        return new Category(
+            id: $data['id'],
+            name: $data['name'],
+            slug: $data['slug'],
+            description: $data['description'] ?? null
+        );
+    }
+
+    public function find(int $id): ?Category
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM categories WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $data ? $this->hydrate($data) : null;
+    }
+
+    public function findAll(): array
+    {
+        $stmt = $this->pdo->query('SELECT * FROM categories');
+        $categories = [];
+
+        while ($data = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $categories[] = $this->hydrate($data);
+        }
+
+        return $categories;
+    }
+
+    public function findBySlug(string $slug): ?Category
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM categories WHERE slug = :slug');
+        $stmt->execute([':slug' => $slug]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $data ? $this->hydrate($data) : null;
+    }
+
+    public function save(Category $category): int
+    {
+        $stmt = $this->pdo->prepare('
+            INSERT INTO categories (name, slug, description)
+            VALUES (:name, :slug, :description)
+        ');
+        $stmt->execute([
+            ':name' => $category->getName(),
+            ':slug' => $category->getSlug(),
+            ':description' => $category->getDescription()
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function update(Category $category): bool
+    {
+        $stmt = $this->pdo->prepare('
+            UPDATE categories
+            SET name = :name, slug = :slug, description = :description
+            WHERE id = :id
+        ');
+
+        return $stmt->execute([
+            ':id' => $category->getId(),
+            ':name' => $category->getName(),
+            ':slug' => $category->getSlug(),
+            ':description' => $category->getDescription()
+        ]);
+    }
+
+    public function delete(int $id): bool
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM categories WHERE id = :id');
+        return $stmt->execute([':id' => $id]);
+    }
+}

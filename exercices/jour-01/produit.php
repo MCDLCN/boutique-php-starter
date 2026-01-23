@@ -1,6 +1,6 @@
 <?php
 
-$name = "amogus";
+$name = 'amogus';
 $price = 19.99;
 $stock = 10000;
 $onsale = true;

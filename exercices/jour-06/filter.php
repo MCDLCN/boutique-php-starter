@@ -9,7 +9,7 @@ $options = [
 $stock = filter_var($_POST['stock'], FILTER_VALIDATE_INT, $options);
 
 if ($stock === false) {
-    echo "Quantité invalide (doit être entre 1 et 99)";
+    echo 'Quantité invalide (doit être entre 1 et 99)';
 }
 
 // À toi : valide un prix entre 0.01 et 9999.99
@@ -17,43 +17,43 @@ if ($stock === false) {
 
 $options2 = [
   'options' => [
-     "min_range" => 0.01,
-     "max_range" => 9999.99
+     'min_range' => 0.01,
+     'max_range' => 9999.99
     ]
 ];
 
 $quantity = filter_var($_POST['stock'], FILTER_VALIDATE_FLOAT, $options2);
 
 if ($quantity === false) {
-    echo "Quantité invalide (doit être entre 0.01 et 9999.99)";
+    echo 'Quantité invalide (doit être entre 0.01 et 9999.99)';
 }
 
 $options3 = [
     'price' => [
-        "min_range" => 0.01,
-        "max_range" => 100000000
+        'min_range' => 0.01,
+        'max_range' => 100000000
     ],
     'stock' => [
-        "min_range" => 0,
-        "max_range" => 100000000
+        'min_range' => 0,
+        'max_range' => 100000000
     ]];
 $data = [
- "name" => $_POST['name'],
- "price" => $_POST['price'],
- "stock" => $_POST['stock']
+ 'name' => $_POST['name'],
+ 'price' => $_POST['price'],
+ 'stock' => $_POST['stock']
 ];
 
 function validateProductForm($data)
 {
     $errors = [];
     if (preg_match('/^[a-z]*$/i', $data['name']) === 0) {
-        $errors[] = "Invalid name";
+        $errors[] = 'Invalid name';
     }
     if (filter_var($data['price'], FILTER_VALIDATE_FLOAT) === false) {
-        $errors[] = "Invalid price";
+        $errors[] = 'Invalid price';
     }
     if (filter_var($data['stock'], FILTER_VALIDATE_INT) === false) {
-        $errors[] = "Invalid stock";
+        $errors[] = 'Invalid stock';
     }
     return $errors;
 }

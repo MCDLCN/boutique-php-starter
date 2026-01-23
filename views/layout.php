@@ -13,13 +13,18 @@
     <div class="container header__container">
         <a href="/" class="header__logo">🛍️ MyShop</a>
         <nav class="header__nav">
-            <a href="/" class="header__nav-link <?= ($currentlyHere === "home") ? "header__nav-link--active" : "" ?>">Home</a>
-            <a href="/catalog" class="header__nav-link <?= ($currentlyHere === "catalog") ? "header__nav-link--active" : "" ?>">Catalog</a>
-            <a href="/contact" class="header__nav-link <?= ($currentlyHere === "contact") ? "header__nav-link--active" : "" ?>">Contact</a>
+            <a href="/" class="header__nav-link <?= ($currentlyHere === 'home') ? 'header__nav-link--active' : '' ?>">Home</a>
+            <a href="/catalog" class="header__nav-link <?= ($currentlyHere === 'catalog') ? 'header__nav-link--active' : '' ?>">Catalog</a>
+            <a href="/contact" class="header__nav-link <?= ($currentlyHere === 'contact') ? 'header__nav-link--active' : '' ?>">Contact</a>
         </nav>
         <div class="header__actions">
             <a href="/cart" class="header__cart">🛒<span class="header__cart-badge"><?= isset($_SESSION['cart']) ? (int) $_SESSION['cart']->countUnique() : 0?></span></a>
-            <a href="connexion.html" class="btn btn--primary btn--sm">Log in</a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <span class="header__user">👤 <?= e($_SESSION['user_name']) ?></span>
+                <a href="/auth/logout" class="btn btn--secondary btn--sm">Log out</a>
+            <?php else: ?>
+                <button onclick="openAuthModal('login')" class="btn btn--primary btn--sm">Log in</button>
+            <?php endif; ?>
         </div>
         <button class="header__menu-toggle">☰</button>
     </div>
@@ -48,5 +53,7 @@
     <footer>
         <p>&copy; <?= date('Y') ?> My shop</p>
     </footer>
+
+    <?php include __DIR__ . '/auth-modal.php'; ?>
 </body>
 </html>

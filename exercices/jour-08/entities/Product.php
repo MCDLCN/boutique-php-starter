@@ -28,7 +28,7 @@ class Product
     public function reduceStock(int $amount): void
     {
         if ($this->stock < $amount) {
-            throw new InvalidArgumentException("Not enough in stock");
+            throw new InvalidArgumentException('Not enough in stock');
             ;
         }
         $this->stock -= $amount;
@@ -41,7 +41,7 @@ class Product
 
     public function isNew(string $dateAdded): bool
     {
-        return strtotime($dateAdded) > strtotime("now - 30 day");
+        return strtotime($dateAdded) > strtotime('now - 30 day');
     }
 
     public function isOnSale(int $discount): bool

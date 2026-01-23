@@ -12,12 +12,12 @@ if (isset($_FILES['image'])) {
     $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     // À toi : vérifie que $file['type'] est dans la liste
     if (!in_array($file['type'], $allowedTypes)) {
-        die("Image type not allowed");
+        die('Image type not allowed');
     }
     // 3. Vérifier la taille (ex: max 2 Mo)
     // À toi : vérifie que $file['size'] < 2 * 1024 * 1024
     if ($file['size'] > 2 * 1024 * 1024) {
-        die("Image too big");
+        die('Image too big');
     }
     // 4. Générer un nom unique (JAMAIS utiliser le nom d'origine !)
     $extension = pathinfo($file['name'], PATHINFO_EXTENSION);

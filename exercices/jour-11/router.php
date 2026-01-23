@@ -25,7 +25,7 @@ class Router
             $controllerInstance->$action();
         } else {
             http_response_code(404);
-            echo "Page non trouvée";
+            echo 'Page non trouvée';
         }
     }
 }

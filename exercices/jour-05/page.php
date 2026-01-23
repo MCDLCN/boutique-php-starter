@@ -1,6 +1,6 @@
 <?php
 //page.php
-require_once "helpers.php";
+require_once 'helpers.php';
 require_once __DIR__ . '/../../app/data.php';
 
 $price = formatPrice(1234.5);

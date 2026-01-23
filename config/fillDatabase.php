@@ -34,21 +34,21 @@ try {
     $pdo->exec("USE {$db}");
 
     // 3) (Re)create tables fresh
-    $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
-    $pdo->exec("DROP TABLE IF EXISTS products");
-    $pdo->exec("DROP TABLE IF EXISTS category");
-    $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
+    $pdo->exec('DROP TABLE IF EXISTS products');
+    $pdo->exec('DROP TABLE IF EXISTS category');
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
 
-    $pdo->exec("
+    $pdo->exec('
         CREATE TABLE category (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(100) NOT NULL UNIQUE
         ) ENGINE=InnoDB
         DEFAULT CHARSET=utf8mb4
         COLLATE=utf8mb4_unicode_ci
-    ");
+    ');
 
-    $pdo->exec("
+    $pdo->exec('
         CREATE TABLE products (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -67,19 +67,19 @@ try {
         ) ENGINE=InnoDB
         DEFAULT CHARSET=utf8mb4
         COLLATE=utf8mb4_unicode_ci
-    ");
+    ');
 
     // 4) Load your old array data
     require_once __DIR__ . '/../app/data.php'; // <-- adjust if needed
 
     if (!isset($products) || !is_array($products)) {
-        throw new RuntimeException("data.php must define \$products as an array.");
+        throw new RuntimeException('data.php must define $products as an array.');
     }
 
     $pdo->beginTransaction();
 
     // 5) Insert category (unique)
-    $insertCategory = $pdo->prepare("INSERT IGNORE INTO category (name) VALUES (?)");
+    $insertCategory = $pdo->prepare('INSERT IGNORE INTO category (name) VALUES (?)');
 
     $seen = [];
     foreach ($products as $p) {
@@ -100,23 +100,23 @@ try {
 
     // 6) Build category name -> id map
     $categoryMap = [];
-    $rows = $pdo->query("SELECT id, name FROM category")->fetchAll();
+    $rows = $pdo->query('SELECT id, name FROM category')->fetchAll();
     foreach ($rows as $r) {
         $categoryMap[(string)$r['name']] = (int)$r['id'];
     }
 
     // 7) Insert products using category
-    $insertProduct = $pdo->prepare("
+    $insertProduct = $pdo->prepare('
         INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+    ');
 
     foreach ($products as $p) {
         $catName = (string)($p['category'] ?? '');
         $catName = trim($catName);
 
         if ($catName === '' || !isset($categoryMap[$catName])) {
-            throw new RuntimeException("Missing/unknown category for product: " . (string)($p['name'] ?? '(no name)'));
+            throw new RuntimeException('Missing/unknown category for product: ' . (string)($p['name'] ?? '(no name)'));
         }
 
         $insertProduct->execute([
@@ -134,13 +134,13 @@ try {
     $pdo->commit();
 
     echo "✅ Database restocked successfully.\n";
-    echo "category: " . (int)$pdo->query("SELECT COUNT(*) FROM category")->fetchColumn() . "\n";
-    echo "Products:   " . (int)$pdo->query("SELECT COUNT(*) FROM products")->fetchColumn() . "\n";
+    echo 'category: ' . (int)$pdo->query('SELECT COUNT(*) FROM category')->fetchColumn() . "\n";
+    echo 'Products:   ' . (int)$pdo->query('SELECT COUNT(*) FROM products')->fetchColumn() . "\n";
 
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    echo "❌ Error: " . $e->getMessage() . "\n";
+    echo '❌ Error: ' . $e->getMessage() . "\n";
     exit(1);
 }

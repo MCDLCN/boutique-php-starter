@@ -21,7 +21,7 @@ do {
 
     if (!in_array($i, $promos)) {
         $promos[] = $i;
-        echo $i . "<br>";
+        echo $i . '<br>';
     } else {
         break;
     }

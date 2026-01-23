@@ -13,11 +13,9 @@ class Router
 
     /**
      * Summary of get
-     * @param string $path
      * @param array{
-     * 0: class-string, 
+     * 0: class-string,
      * 1:string} $action
-     * @return void
      */
     public function get(string $path, array $action): void
     {
@@ -28,11 +26,9 @@ class Router
 
     /**
      * Summary of post
-     * @param string $path
      * @param array{
-     * 0: class-string, 
+     * 0: class-string,
      * 1:string} $action
-     * @return void
      */
     public function post(string $path, array $action): void
     {
@@ -44,8 +40,8 @@ class Router
     public function dispatch(string $uri, string $method): void
     {
         $path = parse_url($uri, PHP_URL_PATH);
-        if ($path === false or $path === null) {
-            new RuntimeException('Uri wrong');
+        if ($path === false || $path === null) {
+            throw new RuntimeException('Uri wrong');
         }
         $found = false;
         // Dans dispatch() - avec preg_match

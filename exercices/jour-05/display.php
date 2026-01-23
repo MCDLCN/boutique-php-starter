@@ -12,11 +12,11 @@ function displayStock(int $quantity): string
 {
     $colour = '';
     if ($quantity > 10) {
-        $colour = "green";
+        $colour = 'green';
     } elseif ($quantity <= 10 && $quantity > 0) {
-        $colour = "orange";
+        $colour = 'orange';
     } else {
-        $colour = "red";
+        $colour = 'red';
     }
     //return '<span style="color:'.$colour.';"> There is '.$quantity.' left.';
     return $colour;

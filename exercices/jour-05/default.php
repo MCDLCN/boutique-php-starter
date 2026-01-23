@@ -6,6 +6,6 @@ function formatPrice(float $amount, string $currency = '$', int  $decimals = 2):
 }
 echo formatPrice(99.999);
 echo '<br>';
-echo formatPrice(99.99999999, "€");
+echo formatPrice(99.99999999, '€');
 echo '<br>';
-echo formatPrice(99.9999, "$", 0);
+echo formatPrice(99.9999, '$', 0);

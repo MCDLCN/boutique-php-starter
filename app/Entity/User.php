@@ -6,10 +6,7 @@ class User
 {
     /**
      * Summary of __construct
-     * @param mixed $id
-     * @param string $name
-     * @param string $email
-     * @param string $registrationDate
+     * @param int $id
      * @param Address[] $Addresses
      */
     public function __construct(

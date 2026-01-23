@@ -13,9 +13,9 @@ final class UserRepository
     public function find(int $id): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, date_inscription
+            'SELECT id, name, email, password_hash, date_inscription
              FROM users
-             WHERE id = ?"
+             WHERE id = ?'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -26,9 +26,9 @@ final class UserRepository
     public function findByEmail(User $user): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, date_inscription
+            'SELECT id, name, email, password_hash, date_inscription
              FROM users
-             WHERE email = ?"
+             WHERE email = ?'
         );
         $stmt->execute([$$user->getEmail()]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -54,9 +54,9 @@ final class UserRepository
     public function findAll(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT id, name, email, password_hash, date_inscription
+            'SELECT id, name, email, password_hash, date_inscription
              FROM users
-             ORDER BY id DESC"
+             ORDER BY id DESC'
         );
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -69,13 +69,13 @@ final class UserRepository
     {
         $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
         if ($hash === false) {
-            throw new RuntimeException("Failed to hash password");
+            throw new RuntimeException('Failed to hash password');
         }
 
         try {
             $stmt = $this->pdo->prepare(
-                "INSERT INTO users (name, email, password_hash, date_inscription)
-                 VALUES (?, ?, ?, ?)"
+                'INSERT INTO users (name, email, password_hash, date_inscription)
+                 VALUES (?, ?, ?, ?)'
             );
             $stmt->execute([
                 $user->getName(),
@@ -85,7 +85,7 @@ final class UserRepository
             ]);
         } catch (PDOException $e) {
             if (($e->errorInfo[1] ?? null) === 1062) {
-                throw new RuntimeException("Email already exists");
+                throw new RuntimeException('Email already exists');
             }
             throw $e;
         }
@@ -100,7 +100,7 @@ final class UserRepository
     {
         try {
             $stmt = $this->pdo->prepare(
-                "UPDATE users SET name = ?, email = ? WHERE id = ?"
+                'UPDATE users SET name = ?, email = ? WHERE id = ?'
             );
             $stmt->execute([
                 $user->getName(),
@@ -109,7 +109,7 @@ final class UserRepository
             ]);
         } catch (PDOException $e) {
             if (($e->errorInfo[1] ?? null) === 1062) {
-                throw new RuntimeException("Email already exists");
+                throw new RuntimeException('Email already exists');
             }
             throw $e;
         }
@@ -120,10 +120,10 @@ final class UserRepository
     {
         $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
         if ($hash === false) {
-            throw new RuntimeException("Failed to hash password");
+            throw new RuntimeException('Failed to hash password');
         }
 
-        $stmt = $this->pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $stmt = $this->pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
         $stmt->execute([$hash, $user->getId()]);
     }
 
@@ -131,9 +131,9 @@ final class UserRepository
     public function verifyCredentials(string $email, string $plainPassword): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, date_inscription
+            'SELECT id, name, email, password_hash, date_inscription
              FROM users
-             WHERE email = ?"
+             WHERE email = ?'
         );
         $stmt->execute([$email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -150,13 +150,13 @@ final class UserRepository
 
     public function delete(User $user): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = ?");
+        $stmt = $this->pdo->prepare('DELETE FROM users WHERE id = ?');
         $stmt->execute([$$user->getId()]);
     }
 
     public function existsEmail(string $email): bool
     {
-        $stmt = $this->pdo->prepare("SELECT 1 FROM users WHERE email = ? LIMIT 1");
+        $stmt = $this->pdo->prepare('SELECT 1 FROM users WHERE email = ? LIMIT 1');
         $stmt->execute([$email]);
         return $stmt->fetchColumn() !== false;
     }

@@ -20,9 +20,9 @@ final class UserRepository
     public function find(int $id): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, registrationDate
+            'SELECT id, name, email, password_hash, registrationDate
              FROM users
-             WHERE id = ?"
+             WHERE id = ?'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -33,9 +33,9 @@ final class UserRepository
     public function findByEmail(string $email): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, registrationDate
+            'SELECT id, name, email, password_hash, registrationDate
              FROM users
-             WHERE email = ?"
+             WHERE email = ?'
         );
         $stmt->execute([$email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -45,11 +45,14 @@ final class UserRepository
 
     public function findWithAddresses(?User $user): ?User
     {
-        if (!$user instanceof \App\Entity\User) {
+        if (!$user instanceof User) {
             return null;
         }
-
-        $addresses = $this->addressRepo->findByUserId($user->getId());
+        $id = $user->getId();
+        if ($id === null) {
+            throw new RuntimeException("This user doesn't exist");
+        }
+        $addresses = $this->addressRepo->findByUserId($id);
         foreach ($addresses as $address) {
             $user->addAddress($address);
         }
@@ -61,12 +64,12 @@ final class UserRepository
     public function findAll(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT id, name, email, password_hash, registrationDate
+            'SELECT id, name, email, password_hash, registrationDate
              FROM users
-             ORDER BY id DESC"
+             ORDER BY id DESC'
         );
         if ($stmt === false) {
-            throw new RuntimeException("Query failed");
+            throw new RuntimeException('Query failed');
         }
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -77,7 +80,7 @@ final class UserRepository
     // Throws RuntimeException if email already exists
     public function save(User $user, string $plainPassword): void
     {
-        if ($plainPassword === ''){
+        if ($plainPassword === '') {
             throw new RuntimeException('Password cannot be empty');
         }
 
@@ -85,8 +88,8 @@ final class UserRepository
 
         try {
             $stmt = $this->pdo->prepare(
-                "INSERT INTO users (name, email, password_hash, registrationDate)
-                 VALUES (?, ?, ?, ?)"
+                'INSERT INTO users (name, email, password_hash, registrationDate)
+                 VALUES (?, ?, ?, ?)'
             );
             $stmt->execute([
                 $user->getName(),
@@ -96,7 +99,7 @@ final class UserRepository
             ]);
         } catch (PDOException $e) {
             if (($e->errorInfo[1] ?? null) === 1062) {
-                throw new RuntimeException("Email already exists", $e->getCode(), $e);
+                throw new RuntimeException('Email already exists', $e->getCode(), $e);
             }
             throw $e;
         }
@@ -109,7 +112,7 @@ final class UserRepository
     {
         try {
             $stmt = $this->pdo->prepare(
-                "UPDATE users SET name = ?, email = ? WHERE id = ?"
+                'UPDATE users SET name = ?, email = ? WHERE id = ?'
             );
             $stmt->execute([
                 $user->getName(),
@@ -118,7 +121,7 @@ final class UserRepository
             ]);
         } catch (PDOException $e) {
             if (($e->errorInfo[1] ?? null) === 1062) {
-                throw new RuntimeException("Email already exists", $e->getCode(), $e);
+                throw new RuntimeException('Email already exists', $e->getCode(), $e);
             }
             throw $e;
         }
@@ -127,13 +130,13 @@ final class UserRepository
     // UPDATE (password)
     public function updatePassword(User $user, string $plainPassword): void
     {
-        if ($plainPassword === ''){
+        if ($plainPassword === '') {
             throw new RuntimeException('Password cannot be empty');
         }
 
         $hash = password_hash($plainPassword, PASSWORD_DEFAULT);
 
-        $stmt = $this->pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $stmt = $this->pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
         $stmt->execute([$hash, $user->getId()]);
     }
 
@@ -141,9 +144,9 @@ final class UserRepository
     public function verifyCredentials(string $email, string $plainPassword): ?User
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, name, email, password_hash, registrationDate
+            'SELECT id, name, email, password_hash, registrationDate
              FROM users
-             WHERE email = ?"
+             WHERE email = ?'
         );
         $stmt->execute([$email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -160,13 +163,13 @@ final class UserRepository
 
     public function delete(User $user): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = ?");
+        $stmt = $this->pdo->prepare('DELETE FROM users WHERE id = ?');
         $stmt->execute([$user->getId()]);
     }
 
     public function existsEmail(string $email): bool
     {
-        $stmt = $this->pdo->prepare("SELECT 1 FROM users WHERE email = ? LIMIT 1");
+        $stmt = $this->pdo->prepare('SELECT 1 FROM users WHERE email = ? LIMIT 1');
         $stmt->execute([$email]);
         return $stmt->fetchColumn() !== false;
     }
@@ -179,7 +182,6 @@ final class UserRepository
      * email: string,
      * registrationDate: string
      * } $row
-     * @return User
      */
     private function hydrate(array $row): User
     {

@@ -24,9 +24,9 @@ foreach (generateNumbers(1000000) as $n) {
 }
 
 // À toi : crée un générateur qui lit un fichier ligne par ligne
-function readCsvRows(string $path, string $delimiter = ","): Generator
+function readCsvRows(string $path, string $delimiter = ','): Generator
 {
-    $handle = fopen($path, "r");
+    $handle = fopen($path, 'r');
     if ($handle === false) {
         throw new RuntimeException("Cannot open file: $path");
     }
@@ -52,8 +52,8 @@ function readCsvRows(string $path, string $delimiter = ","): Generator
 }
 
 
-foreach (readCsvRows("bigfile.csv") as $i => $row) {
-    if ((int)$row["stock"] > 0) {
-        echo $row["name"] . " " . $row["stock"] . "<br>";
+foreach (readCsvRows('bigfile.csv') as $i => $row) {
+    if ((int)$row['stock'] > 0) {
+        echo $row['name'] . ' ' . $row['stock'] . '<br>';
     }
 }

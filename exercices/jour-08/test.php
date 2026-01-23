@@ -5,11 +5,11 @@ foreach ($files as $file) {
     require_once($file);
 }
 
-$user = new User("Cloudz", "cloud@gmail.com", "1234", strtotime("now"));
+$user = new User('Cloudz', 'cloud@gmail.com', '1234', strtotime('now'));
 echo '1';
-$category = new Category(1, "Clothes", "clothes here");
+$category = new Category(1, 'Clothes', 'clothes here');
 echo '2';
-$product = new Product(1, "T-Shirt", "this is a shirt", 10, 1, "Clothes", 10, "image", strtotime("now"));
+$product = new Product(1, 'T-Shirt', 'this is a shirt', 10, 1, 'Clothes', 10, 'image', strtotime('now'));
 
 ?>
 <html>

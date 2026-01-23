@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Database;
+use App\Entity\Cart;
+use App\Entity\CartItem;
+use App\Entity\Product;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
-use App\Entity\CartItem;
 
 class CartController extends Controller
 {
@@ -23,7 +25,7 @@ class CartController extends Controller
 
         foreach (array_keys($cart->getItems()) as $id) {
             $product = $productRepo->find((int)$id);
-            if (!$product instanceof \App\Entity\Product) {
+            if (!$product instanceof Product) {
                 $cart->removeProduct((int)$id);
                 continue;
             }
@@ -42,7 +44,6 @@ class CartController extends Controller
     public function add(): void
     {
         $cart = getCart();
-
         $id = (int)($_POST['idCart'] ?? 0);
         $qty = max(1, (int)($_POST['quantityAdd'] ?? 1));
 
@@ -51,14 +52,14 @@ class CartController extends Controller
         $repo = new ProductRepository($pdo, $catRepo);
 
         $product = $repo->find($id);
-        if (!$product instanceof \App\Entity\Product) {
+        if (!$product instanceof Product) {
             http_response_code(404);
             exit('No such product');
         }
 
 
         $item = $cart->getCartItem($id);
-        if ($item instanceof \App\Entity\CartItem) {
+        if ($item instanceof CartItem) {
             $current = $item->getQuantity();
             if ($product->canAddToCart($qty, $current)) {
                 $item->setQuantity($current + $qty);
@@ -86,7 +87,7 @@ class CartController extends Controller
 
         if ($cart->getCartItem($id) instanceof CartItem) {
             $cart->removeProduct($id);
-            flash('Success','Object removed');
+            flash('Success', 'Object removed');
         }
         $this->redirect('/cart');
         exit;
@@ -113,7 +114,7 @@ class CartController extends Controller
         $repo = new ProductRepository($pdo, $catRepo);
 
         $product = $repo->find($id);
-        if (!$product instanceof \App\Entity\Product) {
+        if (!$product instanceof Product) {
             http_response_code(404);
             exit('No such product');
         }

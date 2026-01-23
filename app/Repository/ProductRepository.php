@@ -18,7 +18,7 @@ class ProductRepository implements RepositoryInterface
     // READ - Un seul
     public function find(int $id): ?Product
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = ?");
+        $stmt = $this->pdo->prepare('SELECT * FROM products WHERE id = ?');
         $stmt->execute([$id]);
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -32,8 +32,8 @@ class ProductRepository implements RepositoryInterface
      */
     public function findAll(): array
     {
-        $stmt = $this->pdo->query("SELECT * FROM products");
-        if ($stmt === false){
+        $stmt = $this->pdo->query('SELECT * FROM products');
+        if ($stmt === false) {
             throw new RuntimeException('Query failed');
         }
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -43,8 +43,8 @@ class ProductRepository implements RepositoryInterface
     public function save(object $entity): void
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            'INSERT INTO products (name, description, price, stock, category, discount, image, dateAdded)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $stmt->execute([
             $entity->getName(),
@@ -63,7 +63,7 @@ class ProductRepository implements RepositoryInterface
     public function update(Product $product): void
     {
         $stmt = $this->pdo->prepare(
-            "UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category = ?, discount = ?, image = ? WHERE id = ?"
+            'UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category = ?, discount = ?, image = ? WHERE id = ?'
         );
         $stmt->execute([
             $product->getName(),
@@ -80,7 +80,7 @@ class ProductRepository implements RepositoryInterface
     // DELETE
     public function delete(int $id): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM products WHERE id = ?");
+        $stmt = $this->pdo->prepare('DELETE FROM products WHERE id = ?');
         $stmt->execute([$id]);
     }
 
@@ -88,12 +88,11 @@ class ProductRepository implements RepositoryInterface
     /**
      * Summary of hydrate
      * @param mixed[] $data
-     * @return Product
      */
     private function hydrate(array $data): Product
     {
         $category = $this->categoryRepo->find((int) $data['category']);
-        if ($category === null){
+        if (!$category instanceof \App\Entity\Category) {
             throw new RuntimeException('Category not found for product'. $data['id']);
         }
         return new Product(
@@ -111,13 +110,12 @@ class ProductRepository implements RepositoryInterface
 
     /**
      * Summary of findByCategory
-     * @param Category $category
      * @return Product[]
      */
     public function findByCategory(Category $category): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products WHERE category = ?"
+            'SELECT * FROM products WHERE category = ?'
         );
         $stmt->execute([$category->getId()]);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -130,9 +128,9 @@ class ProductRepository implements RepositoryInterface
     public function findInStock(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT * FROM products WHERE stock > 0"
+            'SELECT * FROM products WHERE stock > 0'
         );
-        if ($stmt === false){
+        if ($stmt === false) {
             throw new RuntimeException('Query failed');
         }
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -140,13 +138,12 @@ class ProductRepository implements RepositoryInterface
 
     /**
      * Summary of search
-     * @param string $term
      * @return Product[]
      */
     public function search(string $term): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products WHERE name LIKE ?"
+            'SELECT * FROM products WHERE name LIKE ?'
         );
         $stmt->execute(['%' . $term . '%']);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -154,14 +151,12 @@ class ProductRepository implements RepositoryInterface
 
     /**
      * Summary of findByPriceRange
-     * @param float $min
-     * @param float $max
      * @return Product[]
      */
     public function findByPriceRange(float $min, float $max): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products WHERE price>=? AND price<=?"
+            'SELECT * FROM products WHERE price>=? AND price<=?'
         );
         $stmt->execute([$min, $max]);
         return array_map([$this, 'hydrate'], $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -169,8 +164,6 @@ class ProductRepository implements RepositoryInterface
 
     /**
      * Summary of findPaginated
-     * @param int $page
-     * @param int $perPage
      * @return Product[]
      */
     public function findPaginated(int $page, int $perPage = 10): array
@@ -180,13 +173,13 @@ class ProductRepository implements RepositoryInterface
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM products LIMIT :limit OFFSET :offset"
+            'SELECT * FROM products LIMIT :limit OFFSET :offset'
         );
         $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
-        if ($stmt === false){
+        if ($stmt === false) {
             throw new RuntimeException('Query failed');
         }
         return array_map([$this, 'hydrate'], $stmt->fetchAll());
@@ -200,8 +193,6 @@ class ProductRepository implements RepositoryInterface
 
     /**
      * Summary of getPaginationData
-     * @param int $page
-     * @param int $perPage
      * @return array{currentPage: int, hasNext: bool, hasPrevious: bool, perPage: int, total: int, totalPages: int}
      */
     public function getPaginationData(int $page, int $perPage = 10): array
@@ -221,8 +212,6 @@ class ProductRepository implements RepositoryInterface
 
     /**
      * Summary of findPaginatedFiltered
-     * @param int $page
-     * @param int $perPage
      * @param array{
      *  nameSearch: string,
      *  categories: int[],
@@ -233,9 +222,14 @@ class ProductRepository implements RepositoryInterface
      *} $filters
      * @return Product[]
      */
-
-    
-    public function findPaginatedFiltered(int $page, int $perPage = 10, array $filters = []): array
+    public function findPaginatedFiltered(int $page, int $perPage = 10, array $filters = [
+        'nameSearch' => '',
+        'categories' => [],
+        'priceMin' => '',
+        'priceMax' => '',
+        'inStock' => false,
+        'sort' => 'az',
+    ]): array
     {
         $page = max(1, $page);
         $perPage = max(1, $perPage);
@@ -243,12 +237,12 @@ class ProductRepository implements RepositoryInterface
 
         [$whereSql, $params, $needsCategoryJoin] = $this->buildFiltersWhere($filters);
 
-        $orderBy = $this->buildOrderBy($filters['sort'] ?? 'az');
+        $orderBy = $this->buildOrderBy($filters['sort']);
 
-        $sql = "
+        $sql = '
         SELECT p.*
         FROM products p
-        " . ($needsCategoryJoin ? "JOIN category c ON c.id = p.category" : "") . "
+        ' . ($needsCategoryJoin ? 'JOIN category c ON c.id = p.category' : '') . "
         $whereSql
         $orderBy
         LIMIT :limit OFFSET :offset
@@ -284,16 +278,22 @@ class ProductRepository implements RepositoryInterface
      *  inStock: bool,
      *  sort: string
      *} $filters
-     * @return int
      */
-    public function countFiltered(array $filters = []): int
+    public function countFiltered(array $filters = [
+        'nameSearch' => '',
+        'categories' => [],
+        'priceMin' => '',
+        'priceMax' => '',
+        'inStock' => false,
+        'sort' => 'az',
+    ]): int
     {
         [$whereSql, $params, $needsCategoryJoin] = $this->buildFiltersWhere($filters);
 
-        $sql = "
+        $sql = '
         SELECT COUNT(*)
         FROM products p
-        " . ($needsCategoryJoin ? "JOIN category c ON c.id = p.category" : "") . "
+        ' . ($needsCategoryJoin ? 'JOIN category c ON c.id = p.category' : '') . "
         $whereSql
     ";
 
@@ -313,8 +313,6 @@ class ProductRepository implements RepositoryInterface
 
     /**
      * Summary of getPaginationDataFiltered
-     * @param int $page
-     * @param int $perPage
      * @param array{
      *  nameSearch: string,
      *  categories: int[],
@@ -325,7 +323,14 @@ class ProductRepository implements RepositoryInterface
      *} $filters
      * @return array{currentPage: int, hasNext: bool, hasPrevious: bool, perPage: int, total: int, totalPages: int}
      */
-    public function getPaginationDataFiltered(int $page, int $perPage = 10, array $filters = []): array
+    public function getPaginationDataFiltered(int $page, int $perPage = 10, array $filters = [
+        'nameSearch' => '',
+        'categories' => [],
+        'priceMin' => '',
+        'priceMax' => '',
+        'inStock' => false,
+        'sort' => 'az',
+    ]): array
     {
         $page = max(1, $page);
         $perPage = max(1, $perPage);
@@ -357,11 +362,18 @@ class ProductRepository implements RepositoryInterface
      *  sort: string
      *} $filters
      * @return array{
-     * 0: string, 
-     * 1: array<string, int|float|string>, 
+     * 0: string,
+     * 1: array<string, int|float|string>,
      * 2: bool}
      */
-    private function buildFiltersWhere(array $filters): array
+    private function buildFiltersWhere(array $filters = [
+        'nameSearch' => '',
+        'categories' => [],
+        'priceMin' => '',
+        'priceMax' => '',
+        'inStock' => false,
+        'sort' => 'az',
+    ]): array
     {
         $where = [];
         $params = [];
@@ -381,18 +393,18 @@ class ProductRepository implements RepositoryInterface
         // Price range based on FINAL price
         $finalPrice = '(p.price * (1 - (COALESCE(p.discount, 0) / 100)))';
 
-        if ($filters['priceMin'] !== '' && $filters['priceMin'] !== null) {
+        if ($filters['priceMin'] !== '') {
             $where[] = "$finalPrice >= :priceMin";
             $params[':priceMin'] = (float) $filters['priceMin'];
         }
 
-        if ($filters['priceMax'] !== '' && $filters['priceMax'] !== null) {
+        if ($filters['priceMax'] !== '') {
             $where[] = "$finalPrice <= :priceMax";
             $params[':priceMax'] = (float) $filters['priceMax'];
         }
 
         // Categories by NAME (requires join)
-        if (!empty($filters['categories']) && is_array($filters['categories'])) {
+        if (!empty($filters['categories'])) {
             $needsCategoryJoin = true;
 
             $in = [];

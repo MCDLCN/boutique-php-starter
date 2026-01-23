@@ -3,9 +3,9 @@ $products = [];
 
 for ($i = 1; $i <= 11; $i++) {
     $products[] = [
-        "name"  => "Product ".$i,
-        "price" => rand(10, 100),
-        "stock" => rand(0, 50)
+        'name'  => 'Product '.$i,
+        'price' => rand(10, 100),
+        'stock' => rand(0, 50)
     ];
 }
 
@@ -21,7 +21,7 @@ echo '<br>';
 </head>
 <body>
 <?php foreach ($products as $product) {
-    echo '<strong>'.$product["name"].'</strong><br>Price: '.$product["price"].'$. '.$product["stock"].' in stock <br>';
+    echo '<strong>'.$product['name'].'</strong><br>Price: '.$product['price'].'$. '.$product['stock'].' in stock <br>';
 }
 ?>
 </body>

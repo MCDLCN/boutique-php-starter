@@ -18,9 +18,9 @@ final class AddressRepository
     public function find(int $id): ?Address
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, user_id, road, city, postal_code, country, is_default
+            'SELECT id, user_id, road, city, postal_code, country, is_default
              FROM addresses
-             WHERE id = ?"
+             WHERE id = ?'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,10 +32,10 @@ final class AddressRepository
     public function findByUserId(int $id): array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id, user_id, road, city, postal_code, country, is_default
+            'SELECT id, user_id, road, city, postal_code, country, is_default
              FROM addresses
              WHERE user_id = ?
-             ORDER BY is_default DESC, id ASC"
+             ORDER BY is_default DESC, id ASC'
         );
         $stmt->execute([$id]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -49,12 +49,12 @@ final class AddressRepository
         if ($address->isDefault()) {
             $this->pdo->beginTransaction();
             try {
-                $stmt = $this->pdo->prepare("UPDATE addresses SET is_default = 0 WHERE user_id = ?");
+                $stmt = $this->pdo->prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?');
                 $stmt->execute([$user->getId()]);
 
                 $stmt = $this->pdo->prepare(
-                    "INSERT INTO addresses (user_id, road, city, postal_code, country, is_default)
-                     VALUES (?, ?, ?, ?, ?, 1)"
+                    'INSERT INTO addresses (user_id, road, city, postal_code, country, is_default)
+                     VALUES (?, ?, ?, ?, ?, 1)'
                 );
                 $stmt->execute([
                     $user->getId(),
@@ -74,8 +74,8 @@ final class AddressRepository
         }
 
         $stmt = $this->pdo->prepare(
-            "INSERT INTO addresses (user_id, road, city, postal_code, country, is_default)
-             VALUES (?, ?, ?, ?, ?, 0)"
+            'INSERT INTO addresses (user_id, road, city, postal_code, country, is_default)
+             VALUES (?, ?, ?, ?, ?, 0)'
         );
         $stmt->execute([
             $user->getId(),
@@ -92,9 +92,9 @@ final class AddressRepository
     public function update(Address $address): void
     {
         $stmt = $this->pdo->prepare(
-            "UPDATE addresses
+            'UPDATE addresses
              SET road = ?, city = ?, postal_code = ?, country = ?
-             WHERE id = ?"
+             WHERE id = ?'
         );
         $stmt->execute([
             $address->getRoad(),
@@ -108,7 +108,7 @@ final class AddressRepository
     //DELETE
     public function delete(Address $address): void
     {
-        $stmt = $this->pdo->prepare("DELETE FROM addresses WHERE id = ?");
+        $stmt = $this->pdo->prepare('DELETE FROM addresses WHERE id = ?');
         $stmt->execute([$address->getId()]);
     }
 
@@ -117,10 +117,10 @@ final class AddressRepository
     {
         $this->pdo->beginTransaction();
         try {
-            $stmt = $this->pdo->prepare("UPDATE addresses SET is_default = 0 WHERE user_id = ?");
+            $stmt = $this->pdo->prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?');
             $stmt->execute([$user->getId()]);
 
-            $stmt = $this->pdo->prepare("UPDATE addresses SET is_default = 1 WHERE user_id = ? AND id = ?");
+            $stmt = $this->pdo->prepare('UPDATE addresses SET is_default = 1 WHERE user_id = ? AND id = ?');
             $stmt->execute([$user->getId(), $address->getId()]);
 
             $this->pdo->commit();
@@ -133,13 +133,12 @@ final class AddressRepository
     /**
      * Summary of hydrate
      * @param mixed[] $row
-     * @return Address
      */
     private function hydrate(array $row): Address
     {
         return new Address(
-            (int) $row["id"],
-            (int) $row["user_id"],
+            (int) $row['id'],
+            (int) $row['user_id'],
             (string)$row['road'],
             (string)$row['city'],
             (string)$row['postal_code'],

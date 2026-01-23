@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ ."/ClassesPC.php";
+require_once __DIR__ .'/ClassesPC.php';
 class CarItem
 {
     public function __construct(
@@ -29,5 +29,5 @@ $car2 = new CarItem($product2, 80);
 
 $car->decremente();
 $car2->incremente();
-echo $car->quantity."<br>";
-echo $car2->quantity."<br>";
+echo $car->quantity.'<br>';
+echo $car2->quantity.'<br>';

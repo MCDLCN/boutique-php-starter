@@ -69,10 +69,10 @@ class Product
     public function reduceStock(int $amount): void
     {
         if ($amount < 1) {
-            throw new InvalidArgumentException("Amount must be >= 1");
+            throw new InvalidArgumentException('Amount must be >= 1');
         }
         if ($this->stock < $amount) {
-            throw new InvalidArgumentException("Not enough in stock");
+            throw new InvalidArgumentException('Not enough in stock');
         }
         $this->stock -= $amount;
     }
